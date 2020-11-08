@@ -139,13 +139,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CircleObject.h" />
+    <ClInclude Include="Direction.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Map.h" />
     <ClInclude Include="NGP_Agario_Client.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Position.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CircleObject.cpp" />
+    <ClCompile Include="Map.cpp" />
     <ClCompile Include="NGP_Agario_Client.cpp" />
+    <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NGP_Agario_Client.rc" />
