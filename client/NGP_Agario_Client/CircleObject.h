@@ -1,16 +1,17 @@
 #pragma once
 #include "Position.h"
+#include <wtypes.h>
 class CircleObject
 {
 	float size;
 	Position position;
 	
 public:
-	void SetPosition();
 	Position GetPosition();
-	void SetSize(int nsize);
 	int GetSize();
+	void SetPosition(Position& pos);
+	void SetSize(int nsize);
 	void CrashCheck(CircleObject& object);
-	void Draw();
+	void Draw(HDC hdc);
 };
 

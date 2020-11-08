@@ -154,6 +154,7 @@
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="NGP_Agario_Client.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Position.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="NGP_Agario_Client.rc" />

@@ -4,5 +4,9 @@ class Position
 public:
 	int x;
 	int y;
+	Position() { x = -10; y = -10; };
+	Position(int X, int Y) { x = X; y = Y; };
+	void SetPosition(int x ,int y);
+	void GetPosition();
 };
 
