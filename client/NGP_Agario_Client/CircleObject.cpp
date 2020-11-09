@@ -2,6 +2,7 @@
 #include <random>
 #include <random>
 #include <time.h>
+#include <iostream>
 
 
 void CircleObject::SetPosition(Position& pos)
@@ -27,6 +28,11 @@ int CircleObject::GetSize()
 
 void CircleObject::CrashCheck(CircleObject& object)
 {
+    float distance = sqrt((this->position.x - object.position.x) * (this->position.x - object.position.x) + (this->position.x - object.position.x) * (this->position.x - object.position.x));
+    if (distance > this->size)
+    {
+        std::cout << "Ãæµ¹" << std::endl;
+    }
 }
 
 void CircleObject::Draw(HDC hdc)

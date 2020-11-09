@@ -144,6 +144,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
             map->player[0].VerticalMove(map->player->VerticalInput(wParam));
+        map->Update();
         InvalidateRect(hWnd, NULL, TRUE);
     }break;
 

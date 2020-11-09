@@ -20,6 +20,7 @@ Map::Map()
 
 void Map::Update()
 {
+	CrashCheck();
 }
 
 void Map::Draw(HDC hdc)
@@ -37,6 +38,13 @@ void Map::Draw(HDC hdc)
 
 void Map::CrashCheck()
 {
+	for (int i = 0; i < Maxfeed; ++i)
+	{
+		for (int j = 0; j < PlayerNum; ++j)
+		{
+			feed[i].CrashCheck(player[j]);
+		}
+	}
 }
 
 CircleObject Map::MakeRandomFeed()
