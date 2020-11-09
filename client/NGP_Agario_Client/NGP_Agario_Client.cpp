@@ -126,12 +126,26 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetTimer(hWnd, 1, 100, NULL);
         break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            map->Draw(hdc);
-            EndPaint(hWnd, &ps); 
-        }
+        PAINTSTRUCT ps;
+        static HDC hdc, MemDC;
+        static HBITMAP BackBit, oldBackBit;
+        static RECT bufferRT;
+        MemDC = BeginPaint(hWnd, &ps);
+
+        GetClientRect(hWnd, &bufferRT);
+        hdc = CreateCompatibleDC(MemDC);
+        BackBit = CreateCompatibleBitmap(MemDC, bufferRT.right, bufferRT.bottom);
+        oldBackBit = (HBITMAP)SelectObject(hdc, BackBit);
+        PatBlt(hdc, 0, 0, bufferRT.right, bufferRT.bottom, WHITENESS);
+        // draw 하는부분
+        map->Draw(hdc);
+
+        GetClientRect(hWnd, &bufferRT);
+        BitBlt(MemDC, 0, 0, bufferRT.right, bufferRT.bottom, hdc, 0, 0, SRCCOPY);
+        SelectObject(hdc, oldBackBit);
+        DeleteObject(BackBit);
+        DeleteDC(hdc);
+        EndPaint(hWnd, &ps);
         break;
     case WM_KEYDOWN:
     {
@@ -145,7 +159,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
             map->player[0].VerticalMove(map->player->VerticalInput(wParam));
         map->Update();
-        InvalidateRect(hWnd, NULL, TRUE);
+        InvalidateRect(hWnd, NULL, FALSE);
     }break;
 
     case WM_DESTROY:
