@@ -13,5 +13,6 @@ public:
 	void SetSize(int nsize);
 	void CrashCheck(CircleObject& object);
 	void Draw(HDC hdc);
+	void SetRandomPosition();
 };
 

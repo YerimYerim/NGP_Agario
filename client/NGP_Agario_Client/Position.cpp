@@ -10,3 +10,5 @@ Position Position::GetPosition()
 {
 	return *this;
 }
+
+

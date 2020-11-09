@@ -5,7 +5,7 @@ class Map
 {
 	CircleObject* feed;
 	const int Maxfeed = 500;
-	Player player[4];
+	Player* player;
 	int PlayerNum = 1;
 public:
 	Map();

@@ -4,10 +4,17 @@
 
 Map::Map()
 {
-	feed = new CircleObject();
+	feed = new CircleObject[Maxfeed];
 	for (int i = 0; i < Maxfeed; ++i)
 	{
 		feed[i] = MakeRandomFeed();
+	}
+
+	player = new Player[PlayerNum];
+	for (int i = 0; i < PlayerNum; ++i)
+	{
+		player[i].SetRandomPosition();
+		player->SetSize(50);
 	}
 }
 
@@ -17,14 +24,23 @@ void Map::Update()
 
 void Map::Draw(HDC hdc)
 {
+	HBRUSH Brush, oBrush;
+	Brush = CreateSolidBrush(RGB(0, 200, 0));
+	oBrush = (HBRUSH)SelectObject(hdc, Brush);
+
 	for (int i = 0; i < Maxfeed; ++i)
 	{
 		feed[i].Draw(hdc);
 	}
+
+	SelectObject(hdc, oBrush);
+	DeleteObject(Brush);
+
 	for (int i = 0; i < PlayerNum; ++i)
 	{
 		player[i].Draw(hdc);
 	}
+
 }
 
 void Map::CrashCheck()
@@ -33,12 +49,8 @@ void Map::CrashCheck()
 
 CircleObject Map::MakeRandomFeed()
 {
-	std::default_random_engine dre(time(nullptr));
-	std::uniform_int_distribution<unsigned int> uid(10,800);
 	CircleObject* object = new CircleObject();
-	int x = uid(dre);	
-	int y = uid(dre);
-	Position pos(x, y);
-	object->SetPosition(pos);
-	object->SetSize(20);
+	object->SetRandomPosition();
+	object->SetSize(4);
+	return *object;
 }
