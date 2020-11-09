@@ -1,3 +1,2 @@
-﻿  Player.cpp
-D:\NGP\NGP_Agario\client\NGP_Agario_Client\Player.cpp(20): warning C4715: 'Player::input': 모든 제어 경로에서 값을 반환하지는 않습니다.
+﻿  NGP_Agario_Client.cpp
   NGP_Agario_Client.vcxproj -> D:\NGP\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe

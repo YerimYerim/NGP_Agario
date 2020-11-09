@@ -16,3 +16,4 @@ public:
 	CircleObject MakeRandomFeed();
 };
 
+

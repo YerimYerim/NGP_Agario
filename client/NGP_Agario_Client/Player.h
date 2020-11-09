@@ -7,7 +7,10 @@ class Player : public CircleObject
 	std::string name;
 	int score;
 public:
-	Direction input(WPARAM Button);
-	void move(Direction dir);
+	Direction VerticalInput(WPARAM Button);
+	Direction HorizontalInput(WPARAM Button);
+	void VerticalMove(Direction dir);
+	void HorizontalMove(Direction dir);
+
 };
 

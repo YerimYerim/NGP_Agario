@@ -119,23 +119,36 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+
     switch (message)
     {
+    case WM_CREATE:
+        SetTimer(hWnd, 1, 100, NULL);
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             map->Draw(hdc);
-            EndPaint(hWnd, &ps);
+            EndPaint(hWnd, &ps); 
         }
         break;
     case WM_KEYDOWN:
     {
-        map->player[0].move(map->player->input(wParam));
-        InvalidateRect(hWnd, NULL, TRUE);
+        // 여기에서 센드 메시지 하면 될듯
     }
     break;
+    case WM_TIMER:
+    {
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+            map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
+        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+            map->player[0].VerticalMove(map->player->VerticalInput(wParam));
+        InvalidateRect(hWnd, NULL, TRUE);
+    }break;
+
     case WM_DESTROY:
+        KillTimer(hWnd, 1);
         PostQuitMessage(0);
         break;
     default:
@@ -164,3 +177,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return (INT_PTR)FALSE;
 }
+
