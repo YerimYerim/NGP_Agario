@@ -11,6 +11,8 @@ public:
 	Direction HorizontalInput(WPARAM Button);
 	void VerticalMove(Direction dir);
 	void HorizontalMove(Direction dir);
-	void GetScore();
+	void AddScore();
+	int GetScore();
+	void SetScore(int i);
 };
 

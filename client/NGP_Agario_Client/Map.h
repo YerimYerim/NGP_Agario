@@ -6,14 +6,17 @@ class Map
 	CircleObject* feed;
 	const int Maxfeed = 500;
 	int PlayerNum = 1;
+
 public:
-	Player* player;
-	
 	Map();
+	Player* player;
 	void Update();
 	void Draw(HDC hdc);
-	void CrashCheck();
+	void CrashCheckFeedAndPlayer();
+	void CrashCheckPlayers();
+	void AddPlayer();
 	CircleObject MakeRandomFeed();
+
 };
 
 

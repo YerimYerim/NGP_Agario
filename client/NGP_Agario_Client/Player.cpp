@@ -49,9 +49,19 @@ void Player::HorizontalMove(Direction dir)
 	}
 }
 
-void Player::GetScore()
+void Player::AddScore()
 {
 	score++;
 	this->SetSize(this->GetSize() + 1);
+}
+
+int Player::GetScore()
+{
+	return score;
+}
+
+void Player::SetScore(int i)
+{
+	score = i;
 }
 
