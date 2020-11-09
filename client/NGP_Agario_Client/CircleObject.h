@@ -4,9 +4,11 @@
 class CircleObject
 {
 	float size;
-	Position position;
-	
+	int R;
+	int G;
+	int B;
 public:
+	Position position;
 	Position GetPosition();
 	int GetSize();
 	void SetPosition(Position& pos);

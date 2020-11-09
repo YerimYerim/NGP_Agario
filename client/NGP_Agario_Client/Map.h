@@ -5,9 +5,10 @@ class Map
 {
 	CircleObject* feed;
 	const int Maxfeed = 500;
-	Player* player;
 	int PlayerNum = 1;
 public:
+	Player* player;
+	
 	Map();
 	void Update();
 	void Draw(HDC hdc);
