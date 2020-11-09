@@ -1,2 +1,7 @@
-﻿  NGP_Agario_Client.cpp
+﻿  Map.cpp
+  NGP_Agario_Client.cpp
+  Player.cpp
+  코드를 생성하고 있습니다...
+D:\NGP\NGP_Agario\client\NGP_Agario_Client\Player.cpp(12): warning C4715: 'Player::VerticalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
+D:\NGP\NGP_Agario\client\NGP_Agario_Client\Player.cpp(24): warning C4715: 'Player::HorizontalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
   NGP_Agario_Client.vcxproj -> D:\NGP\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe

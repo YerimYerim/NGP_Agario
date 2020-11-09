@@ -26,13 +26,14 @@ int CircleObject::GetSize()
     return size;
 }
 
-void CircleObject::CrashCheck(CircleObject& object)
+BOOL CircleObject::CrashCheck(CircleObject& object)
 {
-    float distance = sqrt((this->position.x - object.position.x) * (this->position.x - object.position.x) + (this->position.x - object.position.x) * (this->position.x - object.position.x));
-    if (distance > this->size)
+    float distance = sqrt((this->position.x - object.position.x) * (this->position.x - object.position.x) + (this->position.y - object.position.y) * (this->position.y - object.position.y));
+    if (distance < this->size/2 + object.size/2)
     {
-        std::cout << "Ãæµ¹" << std::endl;
+        return true;
     }
+    return false;
 }
 
 void CircleObject::Draw(HDC hdc)

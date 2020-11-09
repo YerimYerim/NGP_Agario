@@ -42,7 +42,11 @@ void Map::CrashCheck()
 	{
 		for (int j = 0; j < PlayerNum; ++j)
 		{
-			feed[i].CrashCheck(player[j]);
+			if (feed[i].CrashCheck(player[j]))
+			{
+				feed[i] = MakeRandomFeed();
+				player[j].GetScore();
+			}
 		}
 	}
 }
