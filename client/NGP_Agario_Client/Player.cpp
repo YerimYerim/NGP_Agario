@@ -1,6 +1,22 @@
 #include "Player.h"
 
-Direction Player::input()
+Direction Player::input(WPARAM Button)
 {
-    return Direction();
+	switch (Button)
+	{
+	case VK_LEFT:
+		return LEFT;
+		break;
+	case VK_RIGHT:
+		return RIGHT;
+		break;
+	case VK_UP:
+		return UP;
+		break;
+	case VK_DOWN:
+		return DOWN;
+		break;
+	default:
+		break;
+	}
 }

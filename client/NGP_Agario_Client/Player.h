@@ -6,6 +6,6 @@ class Player : public CircleObject
 {
 	std::string name;
 	int score;
-	Direction input();
+	Direction input(WPARAM Button);
 };
 

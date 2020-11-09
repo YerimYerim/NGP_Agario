@@ -4,6 +4,7 @@
 #include "framework.h"
 #include "NGP_Agario_Client.h"
 #include "CircleObject.h"
+#include "Player.h"
 
 #define MAX_LOADSTRING 100
 
@@ -12,6 +13,7 @@ HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 CircleObject Circle;
+Player player;
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -99,16 +101,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      500, 200, 800, 800, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
       return FALSE;
    }
-   Position* p = new Position(300, 200);
+   Position* p = new Position(200, 200);
    Circle.SetPosition(*p);
-   Circle.SetSize(200);
-
+   Circle.SetSize(50);
+   player.SetPosition(*p);
+   player.SetSize(100);
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -153,6 +156,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             //Ellipse(hdc, 0, 0, 100, 100);
             Circle.Draw(hdc);
+            player.Draw(hdc);
             // TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
             EndPaint(hWnd, &ps);
         }

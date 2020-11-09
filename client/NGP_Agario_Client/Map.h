@@ -5,8 +5,13 @@ class Map
 {
 	CircleObject feed[500];
 	Player player[4];
+public:
+	Map();
+
+
 	void Update();
 	void Draw();
 	void CrashCheck();
+	void MakeRandomFeed();
 };
 

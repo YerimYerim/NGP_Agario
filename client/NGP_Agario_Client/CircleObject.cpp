@@ -14,11 +14,12 @@ Position CircleObject::GetPosition()
 
 void CircleObject::SetSize(int nsize)
 {
+    size = nsize;
 }
 
 int CircleObject::GetSize()
 {
-    return 0;
+    return size;
 }
 
 void CircleObject::CrashCheck(CircleObject& object)

@@ -1,9 +1,12 @@
 #include "Position.h"
 
-void Position::SetPosition(int x, int y)
+void Position::SetPosition(int X, int Y)
 {
+	x = X;
+	y = Y;
 }
 
-void Position::GetPosition()
+Position Position::GetPosition()
 {
+	return *this;
 }
