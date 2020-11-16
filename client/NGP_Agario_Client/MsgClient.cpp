@@ -1,101 +1,152 @@
 #include <windows.h>
-#include <iostream>
-#include <string>
+#include <stdio.h>
+#include <process.h>
 #include "resource.h"
 #pragma warning(disable:4996)
-HINSTANCE g_hInst;
-LPCTSTR lpszClass = "Window Class Name";
-LPCTSTR lpszWindowName = "Window Programming Lab";
-LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-BOOL CALLBACK Dlg6_1Proc(HWND, UINT, WPARAM, LPARAM);
+
+SOCKET g_ClinetSocket = NULL;
+HWND g_hwndName;
+HWND g_hwndIP;
+HWND g_hwndEdit;
+HWND g_hwndList;
+HWND hWnd;
+HWND hWndFocus;
+
+char servIP[15];
+char Name[20];
+char NameStr[128];
+char str[128];
+BOOL SEND = FALSE;
+
+HANDLE hThread1, hThread2;
+DWORD dwThreadID1, dwThreadID2;
+
+unsigned int __stdcall SendMSG(void* arg);
+unsigned int __stdcall RecvMSG(void* arg);
+
+BOOL CALLBACK DIgProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM IParam);
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
 {
-	HWND hWnd;
-	MSG Message;
-	WNDCLASSEX WndClass;
-
-	g_hInst = hInstance;
-	// 윈도우 클래스 구조체 값 설정
-	WndClass.cbSize = sizeof(WndClass);
-	WndClass.style = CS_HREDRAW | CS_VREDRAW;
-	WndClass.lpfnWndProc = (WNDPROC)WndProc;
-	WndClass.cbClsExtra = 0;
-	WndClass.cbWndExtra = 0;
-	WndClass.hInstance = hInstance;
-	WndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	WndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	WndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
-	WndClass.lpszMenuName = NULL;
-	WndClass.lpszClassName = lpszClass;
-	WndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	// 윈도우 클래스 등록
-	RegisterClassEx(&WndClass);
-	// 윈도우 생성
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW, 0, 0, 800, 600, NULL, (HMENU)NULL, hInstance, NULL);
-	// 윈도우 출력
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
-	// 이벤트 루프 처리
-	while (GetMessage(&Message, 0, 0, 0)) {
-		TranslateMessage(&Message);
-		DispatchMessage(&Message);
-	}
-	return Message.wParam;
+    DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, Dlg6_1Proc);
+    return 0;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	HDC hdc;
-	PAINTSTRUCT ps;
-	switch (iMsg)
-	{
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		//-- 이곳에서 dc를 이용하여 출력이 이루어짐
-		EndPaint(hWnd, &ps);
-		break;
-	case WM_LBUTTONDOWN: // 마우스 클릭하면 대화상자 띄우기
-		DialogBox(g_hInst, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, Dlg6_1Proc);
-		break;
-	case WM_TIMER:
-		hdc = GetDC(hWnd);
-		//-- dc를 이용하여 출력 수행
-		ReleaseDC(hWnd, hdc);
-		break;
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-
-	}
-
-	return DefWindowProc(hWnd, iMsg, wParam, lParam); // 위의 세 메시지 외의 나머지 메시지는 OS로
+    switch (iMsg)
+    {
+    case WM_INITDIALOG: OnInitDiaglog(hWnd, hWnd, lParam);
+    case WM_COMMAND: OnCommand(hWnd, wParam); retunr TRUE;
+    case WM_CLOSE: OnClose(hWnd);
+    }
 }
 
-BOOL CALLBACK Dlg6_1Proc(HWND hDlg, UINT iMsg, WPARAM wParam, LPARAM lParam)
+void OnCommand(HWND hwnd, WPARAM wParam)
 {
-	char msg[67];
-	char newline[5] = "\n";
-	
-	//SendMessage(hDlg, LB_ADDSTRING, 0, (LPARAM)msg);
-	//int ncount=(int)SendMessage(hDlg, LB_GETCOUNT, 0, 0);
-	//SendMessage(hDlg, LB_SETTOPINDEX, ncount - 1, 0);
-	switch (iMsg)
-	{
-	case WM_COMMAND:
-		switch (LOWORD(wParam)) {
-		case IDOK:
-			GetDlgItemText(hDlg, IDC_EDIT2, msg, 100); // 문자열 가져오기
-			strcat(msg, newline);
-			SetDlgItemText(hDlg, IDC_STATIC1, msg); // 문자열 출력
-			SetDlgItemText(hDlg, IDC_EDIT2, " ");
-			break;
-		case IDC_BUTTON1:
-			EndDialog(hDlg, 0);
-		case WM_QUIT:
-			return 0;
-		}
-		break;
-	}
+    switch (LOWORD(wParam))
+    {
+    case IDC_CONNECTBUTTON: OnConnect(hwnd); break;
+    case IDC_EXITBUTTON: OnDisConnnect(); break;
+    case IDC_SENDBUTTON: OnSend(hwnd); break;
+    }
+}
 
-	return 0;
+void OnClose(HWND hWnd) //종료버튼 처리
+{
+    closesocket(g_ClinetSocket);
+}
+
+void AddStringToList(HWND g_hwndList, char* szltem)
+{
+    SendMessage(g_hwndList, LB_ADDSTRING, 0, (LPARAM)szltem);
+    int nCount = (int)SendMessage(g_hwndList, LB_GETCOUNT, 0, 0);
+    SendMessage(g_hwndList, LB_SETTOPINDEX, nCount - 1, 0);
+}
+
+//대화상자 초기화
+BOOL OnInitDiaglog(HWND hWnd, HWND hWndFocus, LPARAM IParam)
+{
+    //윈도우 핸들 구하기
+    g_hwndName = GetDlgItem(hWnd, IDC_IDEDIT);
+    g_hwndEdit = GetDlgItem(hWnd, IDC_CHATEDIT);
+    g_hwndList = GetDlgItem(hWnd, IDC_CHATLIST);
+
+    AddStringToList(g_hwndList, "IP입력후 연결클릭");
+    return TRUE;
+}
+
+void OnConnect(HWND hwnd)
+{
+    GetDlgItemText(hwnd, IDC_IDEDIT, Name, 20);
+    //주소 생성
+    GetDlgItemText(hwnd, IDC_IPEDIT, servIP, 15);
+
+    //소켓 생성
+    g_ClinetSocket = socket(PF_INET, SOCK_STREAM, 0);
+    if (g_ClinetSocket == INVALID_SOCKET) AddStringToList(g_hwndList, "Socket Error");
+
+    //서버 주소 초기화
+    SOCKADDR_IN servAddr;
+    memset(&servAddr, 0, sizeof(servAddr));
+    //여기 수정해야 할듯
+    servAddr.sin_family = AF_INET;
+    servAddr.sin_addr.S_un.S_addr = inet_addr(servIP);
+    servAddr.sin_port = htons(atoi("9000"));
+    if (connect(g_ClinetSocket, (SOCKADDR*)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+        AddStringToList(g_hwndList, "서버와연결이 끊겼습니다.");
+}
+
+//종료
+void OnDisConnect()
+{
+    closesocket(g_ClinetSocket);
+    AddStringToList(g_hwndList, "서버와 연결이 종료되었습니다.");
+}
+
+//메세지 전송
+void OnSend(HWND hwnd) //송신 쓰레드
+{
+    //데이터 전송
+    GetDlgItemText(hwnd, IDC_CHATEDIT, str, sizeof(str));
+
+    //전송문자 삭제
+    SetDlgItemText(hwnd, IDC_CHATEDIT, "");
+    SetFocus(GetDlgItem(hwnd, IDC_CHATEDIT));
+
+    SEND = TRUE;
+    //쓰레드에서 메세지 전송
+}
+
+unsigned int __stdcall SendMSG(void* arg)
+{
+    while (1)
+    {
+        if (SEND) //시지 전송?
+        {
+            sprintf(NameStr, "[%S] %S", Name, str);
+            send(g_ClinetSocket, NameStr, (int)strlen(NameStr), 0);
+
+            SEND = FALSE;
+        }
+        return 0;
+    }
+}
+
+unsigned int __stdcall RecvMSG(void* arg)
+{
+    while (1)
+    {
+        int nRecv;
+        nRecv = recv(g_ClinetSocket, NameStr, sizeof(NameStr) - 1, 0);
+        if (nRecv == -1)
+            return 1;
+        NameStr[nRecv] = 0;
+
+        if (nRecv > 0)
+            AddStringToList(g_hwndList, NameStr);
+        else
+            AddStringToList(g_hwndList, "서버에 접속 되어있지 않습니다.");
+    }
+    return 0;
 }
