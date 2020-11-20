@@ -1,15 +1,18 @@
-#define _CRT_SECURE_NO_WARNINGS        
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS         // 최신 VC++ 컴파일 시 경고 방지
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 최신 VC++ 컴파일 시 경고 방지
 #pragma comment(lib, "ws2_32")
 #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include<CommCtrl.h>
 
 #define SERVERPORT 9000
 #define BUFSIZE    512
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK WndProgress(HWND, UINT, WPARAM, LPARAM);
+WNDPROC Progress;
 // 편집 컨트롤 출력 함수
 void DisplayText(char* fmt, ...);
 // 오류 출력 함수
@@ -20,7 +23,7 @@ DWORD WINAPI ServerMain(LPVOID arg);
 DWORD WINAPI ProcessClient(LPVOID arg);
 
 HINSTANCE hInst; // 인스턴스 핸들
-HWND hEdit; // 편집 컨트롤
+HWND hEdit;
 CRITICAL_SECTION cs; // 임계 영역
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -44,8 +47,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     if (!RegisterClass(&wndclass)) return 1;
 
     // 윈도우 생성
-    HWND hWnd = CreateWindow("Msg", "TCP 서버", WS_OVERLAPPEDWINDOW,
-        0, 0, 600, 200, NULL, NULL, hInstance, NULL);
+    HWND hWnd = CreateWindow("MyWndClass", "TCP 서버", WS_OVERLAPPEDWINDOW,
+        0, 0, 600, 600, NULL, NULL, hInstance, NULL);
     if (hWnd == NULL) return 1;
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
@@ -87,6 +90,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+
+
+
 // 편집 컨트롤 출력 함수
 void DisplayText(const char* fmt, ...)
 {
@@ -104,6 +110,10 @@ void DisplayText(const char* fmt, ...)
 
     va_end(arg);
 }
+
+
+
+
 
 // 소켓 함수 오류 출력 후 종료
 void err_quit(const char* msg)
@@ -130,6 +140,25 @@ void err_display(const char* msg)
         (LPTSTR)&lpMsgBuf, 0, NULL);
     DisplayText("[%s] %s", msg, (char*)lpMsgBuf);
     LocalFree(lpMsgBuf);
+}
+
+int recvn(SOCKET s, char* buf, int len, int flags)
+{
+    int received;
+    char* ptr = buf;
+    int left = len;
+
+    while (left > 0) {
+        received = recv(s, ptr, left, flags);
+        if (received == SOCKET_ERROR)
+            return SOCKET_ERROR;
+        else if (received == 0)
+            break;
+        left -= received;
+        ptr += received;
+    }
+
+    return (len - left);
 }
 
 // TCP 서버 시작 부분
@@ -173,7 +202,6 @@ DWORD WINAPI ServerMain(LPVOID arg)
             err_display("accept()");
             break;
         }
-
         // 접속한 클라이언트 정보 출력
         DisplayText("\r\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\r\n",
             inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
@@ -196,6 +224,7 @@ DWORD WINAPI ServerMain(LPVOID arg)
 // 클라이언트와 데이터 통신
 DWORD WINAPI ProcessClient(LPVOID arg)
 {
+
     SOCKET client_sock = (SOCKET)arg;
     int retval;
     SOCKADDR_IN clientaddr;
