@@ -15,6 +15,7 @@ public:
 	void CrashCheckFeedAndPlayer();
 	void CrashCheckPlayers();
 	void AddPlayer();
+	BOOL GameEnd();
 	CircleObject MakeRandomFeed();
 
 };

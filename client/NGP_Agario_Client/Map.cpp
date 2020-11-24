@@ -21,6 +21,10 @@ Map::Map()
 
 void Map::Update()
 {
+	if (GameEnd())
+	{
+		exit(1);
+	}
 	CrashCheckFeedAndPlayer();
 	CrashCheckPlayers();
 }
@@ -89,6 +93,18 @@ void Map::AddPlayer()
 	player[PlayerNum].SetRandomPosition();
 	player[PlayerNum].SetSize(50);
 	PlayerNum++;
+}
+
+BOOL Map::GameEnd()
+{
+	for (int i = 0; i < PlayerNum; ++i)
+	{
+		if (player[i].GetSize() > 300)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 CircleObject Map::MakeRandomFeed()
