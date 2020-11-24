@@ -139,7 +139,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PatBlt(hdc, 0, 0, bufferRT.right, bufferRT.bottom, WHITENESS);
         // draw 하는부분
         map->Draw(hdc);
-
         GetClientRect(hWnd, &bufferRT);
         BitBlt(MemDC, 0, 0, bufferRT.right, bufferRT.bottom, hdc, 0, 0, SRCCOPY);
         SelectObject(hdc, oldBackBit);

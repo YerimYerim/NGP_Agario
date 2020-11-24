@@ -9,7 +9,7 @@ Map::Map()
 	{
 		feed[i] = MakeRandomFeed();
 	}
-
+		
 	player = new Player[4];
 	for (int i = 0; i < PlayerNum; ++i)
 	{
