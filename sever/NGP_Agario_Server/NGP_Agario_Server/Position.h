@@ -1,5 +1,4 @@
 #pragma once
-
 class Position
 {
 public:
@@ -8,7 +7,7 @@ public:
 
 	Position() { x = -10; y = -10; };
 	Position(int X, int Y) { x = X; y = Y; };
-	void SetPosition(int X, int Y);
+	void SetPosition(int X ,int Y);
 	Position GetPosition();
 	void moveRight();
 	void moveLeft();
