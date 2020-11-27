@@ -1,8 +1,5 @@
 ﻿  NGP_Agario_Client.cpp
-  Player.cpp
-  Position.cpp
-  코드를 생성하고 있습니다...
-C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\client\NGP_Agario_Client\Player.cpp(12): warning C4715: 'Player::VerticalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
-C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\client\NGP_Agario_Client\Player.cpp(24): warning C4715: 'Player::HorizontalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
-C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(125): warning C4715: 'Server_Thread': 모든 제어 경로에서 값을 반환하지는 않습니다.
-  NGP_Agario_Client.vcxproj -> C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe
+D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(128): warning C4715: 'Server_Thread': 모든 제어 경로에서 값을 반환하지는 않습니다.
+D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(181): warning C4715: 'KeyboardSend': 모든 제어 경로에서 값을 반환하지는 않습니다.
+D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(163): warning C4700: 초기화되지 않은 'count' 지역 변수를 사용했습니다.
+  NGP_Agario_Client.vcxproj -> D:\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe

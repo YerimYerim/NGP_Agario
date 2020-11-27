@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Map.h"
 #include"Global.h"
+#include "ClientSend.h"
 
 #define SERVERIP "127.0.0.1"
 #define SERVERPORT 9000
@@ -19,6 +20,8 @@
 SOCKET sock; // 소켓
 HANDLE MainEvent; // 이벤트
 unsigned short Player_id; // 플레이어 아디
+HANDLE ProtocolThread;
+HANDLE SendKeyBoardThread;
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -116,12 +119,65 @@ DWORD WINAPI Server_Thread(LPVOID arg)
     
     // 플레이어 id 수신
     retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
+    cout << "recv " << endl;
     if (retval == SOCKET_ERROR) {
         err_display("recv() - Player_id");
         exit(1);
+        }
+    TerminateThread(ProtocolThread, NULL);
+}
+DWORD WINAPI KeyboardSend(LPVOID wParam)
+{
+    unsigned int count;
+
+    int retval;
+    WSADATA wsa;
+   
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+        return 1;
+
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
+    
+    SOCKADDR_IN serveraddr; //서버와 통신용 소켓
+    ZeroMemory(&serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
+    serveraddr.sin_port = htons(SERVERPORT);
+    retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+
+    if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
+
+    // 데이터 통신에 사용할 변수
+    char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
+                       //파일 기본 정보 전송
+
+    retval = send(sock, (char*)&wParam, sizeof(wParam), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
+    if (retval == SOCKET_ERROR) {
+        err_display((char*)"send()");
+        exit(1);
     }
 
-
+    while (count)
+    {
+        retval = send(sock, buf, BUFSIZE, 0); // bufsize 만큼 읽음
+        if (retval == SOCKET_ERROR) {
+            err_display((char*)"send()");
+            exit(1);
+        }
+    }
+    retval = send(sock, buf, BUFSIZE, 0);
+    if (retval == SOCKET_ERROR) {
+        err_display((char*)"send()");
+        exit(1);
+    }
+    closesocket(sock);
+    // 윈속 종료
+    WSACleanup();
+    //파일포인터 닫기
+    TerminateThread(SendKeyBoardThread, NULL);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -138,7 +194,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     if (MainEvent == NULL)
         return 1;
 
-    CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
+
 
 
 
@@ -233,6 +289,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
+        ProtocolThread = CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
         break;
     case WM_PAINT:
         PAINTSTRUCT ps;
@@ -258,6 +315,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_KEYDOWN:
     {
         // 여기에서 센드 메시지 하면 될듯
+        //KeyboardSend
+        SendKeyBoardThread = CreateThread(NULL,0,KeyboardSend, (LPVOID)wParam,0,NULL);
     }
     break;
     case WM_TIMER:
