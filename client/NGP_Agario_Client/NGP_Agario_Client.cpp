@@ -21,8 +21,10 @@ SOCKET sock; // 소켓
 HANDLE MainEvent; // 이벤트
 unsigned short Player_id; // 플레이어 아디
 HANDLE ProtocolThread;
-HANDLE SendKeyBoardThread;
-
+HANDLE SendKeyBoardThreadVertical;
+HANDLE SendKeyBoardThreadHorizontal;
+HANDLE MapRecvHandle;
+SendDirection sendDirection;
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
@@ -126,6 +128,8 @@ DWORD WINAPI Server_Thread(LPVOID arg)
         }
     TerminateThread(ProtocolThread, NULL);
 }
+
+
 DWORD WINAPI KeyboardSend(LPVOID wParam)
 {
     unsigned int count;
@@ -153,8 +157,7 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
     char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
                        //파일 기본 정보 전송
 
-    retval = send(sock, (char*)&wParam, sizeof(wParam), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-
+    retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
     if (retval == SOCKET_ERROR) {
         err_display((char*)"send()");
         exit(1);
@@ -177,7 +180,7 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
     // 윈속 종료
     WSACleanup();
     //파일포인터 닫기
-    TerminateThread(SendKeyBoardThread, NULL);
+    TerminateThread(SendKeyBoardThreadVertical, NULL);
 }
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -290,6 +293,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
         ProtocolThread = CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
+        sendDirection.id = Player_id;
         break;
     case WM_PAINT:
         PAINTSTRUCT ps;
@@ -316,15 +320,25 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         // 여기에서 센드 메시지 하면 될듯
         //KeyboardSend
-        SendKeyBoardThread = CreateThread(NULL,0,KeyboardSend, (LPVOID)wParam,0,NULL);
+
+        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+        {
+            sendDirection.dir = player.VerticalInput(wParam);
+            SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+        }
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+        {
+            sendDirection.dir = player.HorizontalInput(wParam);
+            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+        }
     }
     break;
     case WM_TIMER:
     {
-        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-            map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
-        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-            map->player[0].VerticalMove(map->player->VerticalInput(wParam));
+        //if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+        //    map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
+        //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+        //    map->player[0].VerticalMove(map->player->VerticalInput(wParam));
         map->Update();
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
