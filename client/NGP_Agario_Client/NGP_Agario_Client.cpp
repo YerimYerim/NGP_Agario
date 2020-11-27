@@ -6,9 +6,19 @@
 #include "CircleObject.h"
 #include "Player.h"
 #include "Map.h"
+#include"Global.h"
+
+#define SERVERIP "127.0.0.1"
+#define SERVERPORT 9000
+#define BUFSIZE 30000
+
 
 #define MAX_LOADSTRING 100
 
+// 서버
+SOCKET sock; // 소켓
+HANDLE MainEvent; // 이벤트
+unsigned short Player_id; // 플레이어 아디
 
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -17,11 +27,102 @@ WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름�
 CircleObject Circle;
 Player player;
 Map* map;
+
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+
+// 서버 사용
+DWORD WINAPI Server_Thread(LPVOID arg);
+
+// 소켓함수 오류 출력 후 종료
+void err_quit(const char* msg)
+{
+    LPVOID IpMsgBuf;
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL, WSAGetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR)&IpMsgBuf, 0, NULL);
+    MessageBox(NULL, (LPCTSTR)IpMsgBuf, (LPCTSTR)msg, MB_ICONERROR);
+    LocalFree(IpMsgBuf);
+    exit(-1);
+}
+
+// 소켓 함수 오류 출력
+void err_display(const char* msg)
+{
+    LPVOID IpMsgBuf;
+    FormatMessage(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL, WSAGetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR)&IpMsgBuf, 0, NULL);
+    printf("[%s] %s", msg, (LPCTSTR)IpMsgBuf);
+    LocalFree(IpMsgBuf);
+}
+
+int recvn(SOCKET s, char* buf, int len, int flags)
+{
+    int received;
+    char* ptr = buf;
+    int left = len;
+
+    while (left > 0) {
+        received = recv(s, ptr, left, flags);
+        if (received == SOCKET_ERROR)
+            return SOCKET_ERROR;
+        else if (received == 0)
+            break;
+        left -= received;
+        ptr += received;
+    }
+
+    return (len - left);
+}
+
+
+DWORD WINAPI Server_Thread(LPVOID arg)
+{
+    int retval;
+
+    retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
+    if (retval != WAIT_OBJECT_0)
+        return 1;
+      
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+        return 1;
+
+    // socket()
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == INVALID_SOCKET)
+        err_quit("socket()");
+
+    // connect()
+    SOCKADDR_IN serveraddr;
+    ZeroMemory(&serveraddr, sizeof(serveraddr));
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); // 수정 18.11.17 (이재원)
+    serveraddr.sin_port = htons(SERVERPORT); // 수정 18.11.17 (이재원)
+    retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+    if (retval == SOCKET_ERROR)
+        err_quit("connect()");
+    
+    // 플레이어 id 수신
+    retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
+    if (retval == SOCKET_ERROR) {
+        err_display("recv() - Player_id");
+        exit(1);
+    }
+
+
+}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -32,6 +133,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 여기에 코드를 입력합니다.
+
+    MainEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (MainEvent == NULL)
+        return 1;
+
+    CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
+
+
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);

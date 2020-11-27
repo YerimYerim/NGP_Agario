@@ -66,11 +66,11 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 }
 
 // 변수
-HANDLE hCollideEvent; // Collide 쓰레드
+HANDLE CollideEvent; // Collide 쓰레드
 
 
 // 이벤트
-HANDLE hMainEvent; // main 이벤트
+HANDLE MainEvent; // main 이벤트
 
 
 // 클라이언트와 데이터 통신 쓰레드
@@ -94,10 +94,11 @@ DWORD WINAPI Client_Thread(LPVOID arg)
 	retval = send(client_sock, (char*)&rid, sizeof(rid), 0);
 	if (retval == SOCKET_ERROR)
 	{
-		err_display("send()_playernum");
+		err_display("send() - Player_id");
 		exit(1);
 	}
 
+	/*
 	// 플레이어의 초기 위치
 	retval = send(client_sock, (char*));
 	if (retval == SOCKET_ERROR) {
@@ -151,7 +152,7 @@ DWORD WINAPI Client_Thread(LPVOID arg)
 
 	}
 
-	
+	*/
 
 	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
 
@@ -159,17 +160,20 @@ DWORD WINAPI Client_Thread(LPVOID arg)
 	// closesocket()
 	closesocket(client_sock);
 
-	return 0
+	return 0;
 }
 
+/*
 DWORD WINAPI Collide_Thread(LPVOID arg)
 {
 
 }
+*/
 
 
 int main()
 {
+	/*
 	// 시간 측정 나중에 알맞은 위치에 옮기면 된다.
 	auto start_time = high_resolution_clock::now();
 
@@ -180,7 +184,7 @@ int main()
 
 	// 시간 출력
 	cout << exec_ms << "s" << endl;
-
+	*/
 
 	// 서버 초기화
 	int retval;
@@ -218,8 +222,8 @@ int main()
 	HANDLE hThread;
 
 	// 플레이어가 모두 입장시 쓰레드 시작 이벤트
-	hMainEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (hMainEvent == NULL)
+	MainEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (MainEvent == NULL)
 		return 1;
 
 

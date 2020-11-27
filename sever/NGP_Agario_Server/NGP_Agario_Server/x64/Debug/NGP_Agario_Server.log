@@ -1,17 +1,7 @@
 ﻿  NGP_Agario_Server.cpp
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(102,36): error C2059: 구문 오류: ')'
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(111,44): warning C4244: '인수': 'float'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(116,39): error C2065: 'r': 선언되지 않은 식별자입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(122,12): error C2065: 'h': 선언되지 않은 식별자입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(126,3): error C2146: 구문 오류: ';'이(가) 'retval' 식별자 앞에 없습니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(132,38): error C2065: 'my_fg': 선언되지 않은 식별자입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(132,52): error C2065: 'my_fg': 선언되지 않은 식별자입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(139,30): error C2059: 구문 오류: ')'
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(163,1): error C2143: 구문 오류: ';'이(가) '}' 앞에 없습니다.
-D:\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(178,14): warning C4244: '초기화 중': '_Rep'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-          with
-          [
-              _Rep=__int64
-          ]
-  Position.cpp
-  코드를 생성하고 있습니다...
+C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(82,6): warning C4101: 'Player_id' :참조되지 않은 지역 변수입니다.
+C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(222,9): warning C4101: 'hThread' :참조되지 않은 지역 변수입니다.
+C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(219,9): warning C4101: 'client_sock' :참조되지 않은 지역 변수입니다.
+C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(220,14): warning C4101: 'clientaddr' :참조되지 않은 지역 변수입니다.
+C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\NGP_Agario_Server\NGP_Agario_Server.cpp(221,6): warning C4101: 'addrlen' :참조되지 않은 지역 변수입니다.
+  NGP_Agario_Server.vcxproj -> C:\Users\lee94\OneDrive\문서\GitHub\NGP_Agario\sever\NGP_Agario_Server\x64\Debug\NGP_Agario_Server.exe
