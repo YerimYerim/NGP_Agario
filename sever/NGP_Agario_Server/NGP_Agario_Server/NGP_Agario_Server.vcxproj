@@ -149,6 +149,7 @@
     <ClInclude Include="CircleObject.h" />
     <ClInclude Include="Direction.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Global.h" />
     <ClInclude Include="Pack_Struct.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Position.h" />

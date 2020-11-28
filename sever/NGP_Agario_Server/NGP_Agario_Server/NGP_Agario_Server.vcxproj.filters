@@ -32,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Pack_Struct.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="CircleObject.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -54,6 +51,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Global.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Pack_Struct.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

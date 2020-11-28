@@ -3,33 +3,29 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
 #include<WinSock2.h>
-#include<stdlib.h>
-#include<iostream>
-#include<thread>
-#include<vector>
-#include<chrono>
-#include<random>
+#include"Global.h"
 
 
 #define SERVERPORT 9000
 #define BUFSIZE 1024
-#define N_Player 3
+#define N_Player 2
 
 using namespace std::chrono;
 using namespace std;
 
-// 소켓 함수 오류 출력 후 종료
+// 소켓함수 오류 출력 후 종료
 void err_quit(const char* msg)
 {
 	LPVOID IpMsgBuf;
 	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&IpMsgBuf, 0, NULL);
-	MessageBox(NULL, (LPCTSTR)IpMsgBuf,(LPCWSTR)msg, MB_ICONERROR);
+	MessageBox(NULL, (LPCTSTR)IpMsgBuf, (LPCTSTR)msg, MB_ICONERROR);
 	LocalFree(IpMsgBuf);
-	exit(1);
+	exit(-1);
 }
 
 // 소켓 함수 오류 출력
@@ -37,15 +33,15 @@ void err_display(const char* msg)
 {
 	LPVOID IpMsgBuf;
 	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL, WSAGetLastError(),
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 		(LPTSTR)&IpMsgBuf, 0, NULL);
-	printf("[%s] %s", msg, (const char*)IpMsgBuf);
+	printf("[%s] %s", msg, (LPCTSTR)IpMsgBuf);
 	LocalFree(IpMsgBuf);
 }
 
-// 사용자 정의 데이터 수신 함수
 int recvn(SOCKET s, char* buf, int len, int flags)
 {
 	int received;
@@ -64,6 +60,7 @@ int recvn(SOCKET s, char* buf, int len, int flags)
 
 	return (len - left);
 }
+
 
 // 변수
 HANDLE CollideEvent; // Collide 쓰레드
@@ -221,15 +218,73 @@ int main()
 	int addrlen;
 	HANDLE hThread;
 
+	/*
+	for (int i = 0; i < 3; i++) {
+		CollideEvent[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	}
+	*/
+
+
 	// 플레이어가 모두 입장시 쓰레드 시작 이벤트
 	MainEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (MainEvent == NULL)
 		return 1;
+	
 
 
 
+
+	// 쓰레드 생성
+	// 충돌 쓰레드
+
+	// 메인 쓰레드
+	while (true){
+		
+		// accept
+		addrlen = sizeof(clientaddr);
+		client_sock = accept(listen_sock, (SOCKADDR*)&clientaddr, &addrlen);
+		if (client_sock == INVALID_SOCKET)
+		{
+			err_display("accept()");
+			break;
+		}
+		
+		// Nagle 알고리즘 해제
+		int opt_val = TRUE; // FALSE : Nagle 알고리즘 설정
+		setsockopt(client_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&opt_val, sizeof(opt_val));
+
+		// 접속한 클라이언트 정보 출력
+		printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
+
+
+		// 클라이언트 스레드
+		hThread = CreateThread(NULL, 0, Client_Thread, (LPVOID)client_sock, 0, NULL);
+		if (hThread == NULL)
+			closesocket(client_sock);
+		else
+		{
+			N_Client++; // 클라이언트 갯수
+
+			if (N_Client == 2)
+			{
+				SetEvent(MainEvent); // 메인 이벤트 호출
+			}
+
+			CloseHandle(hThread);
+		}
+	}
+
+	// closesocket()
+	closesocket(listen_sock);
+
+	// 이벤트 종료
+
+	CloseHandle(MainEvent);
+
+	
 	// 윈속 종료
 	WSACleanup();
-
+	
 	return 0;
 }
