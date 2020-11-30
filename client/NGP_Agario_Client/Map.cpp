@@ -9,14 +9,14 @@ Map::Map()
 	{
 		feed[i] = MakeRandomFeed();
 	}
-		
+
 	player = new Player[4];
 	for (int i = 0; i < PlayerNum; ++i)
 	{
 		player[i].SetRandomPosition();
 		player->SetSize(50);
 	}
-	AddPlayer();
+	//AddPlayer();
 }
 
 void Map::Update()
@@ -73,7 +73,7 @@ void Map::CrashCheckPlayers()
 					player[j].SetRandomPosition();
 					player[j].SetSize(50);
 					player[j].SetScore(0);
-				
+
 				}
 				if (player[i].GetSize() < player[j].GetSize())
 				{

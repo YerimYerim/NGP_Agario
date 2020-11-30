@@ -29,7 +29,7 @@ int CircleObject::GetSize()
 BOOL CircleObject::CrashCheck(CircleObject& object)
 {
     float distance = sqrt((this->position.x - object.position.x) * (this->position.x - object.position.x) + (this->position.y - object.position.y) * (this->position.y - object.position.y));
-    if (distance < this->size/2 + object.size/2)
+    if (distance < this->size / 2 + object.size / 2)
     {
         return true;
     }
@@ -42,7 +42,7 @@ void CircleObject::Draw(HDC hdc)
     Brush = CreateSolidBrush(RGB(R, G, B));
     oBrush = (HBRUSH)SelectObject(hdc, Brush);
 
-    Ellipse(hdc, position.x - size/2, position.y - size/2, position.x + size / 2, position.y + size / 2);
+    Ellipse(hdc, position.x - size / 2, position.y - size / 2, position.x + size / 2, position.y + size / 2);
 
     SelectObject(hdc, oBrush);
     DeleteObject(Brush);

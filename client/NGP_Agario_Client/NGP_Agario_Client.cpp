@@ -118,66 +118,43 @@ DWORD WINAPI Server_Thread(LPVOID arg);
         retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
         if (retval == SOCKET_ERROR)
             err_quit("connect()");
-    
-        // 플레이어 id 수신
-        retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
-        cout << "recv " << endl;
-        if (retval == SOCKET_ERROR)
-        {
-            err_display("recv() - Player_id");
-            exit(1);
-        }
-        while (map->GameEnd())
-        {
-            retval = recvn(sock, (char*)&map, sizeof(map), 0);
-            if (retval == SOCKET_ERROR)
-            {
-                err_display("recv()");
-                exit(1);
-            }
-        }
+  
+        // 소캣 연결
 
-    }
-
-
-    DWORD WINAPI KeyboardSend(LPVOID wParam)
-    {
-        unsigned int count;
-
-        int retval;
-        WSADATA wsa;
-   
-        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-            return 1;
-
-        SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-
-        if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
-    
-        SOCKADDR_IN serveraddr; //서버와 통신용 소켓
-        ZeroMemory(&serveraddr, sizeof(serveraddr));
-        serveraddr.sin_family = AF_INET;
-        serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
-        serveraddr.sin_port = htons(SERVERPORT);
-        retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-
-        if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
-
-        // 데이터 통신에 사용할 변수
-        char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
-                           //파일 기본 정보 전송
-
-        retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
-        if (retval == SOCKET_ERROR) {
+   //     retval = send(sock, (char*)Player_id, sizeof(Player_id), 0);
+        if (retval == INVALID_SOCKET) {
             err_display((char*)"send()");
-            exit(1);
         }
-        closesocket(sock);
-        // 윈속 종료
-        WSACleanup();
-        //파일포인터 닫기
-        TerminateThread(SendKeyBoardThreadVertical, NULL);
+
+        while (!map->GameEnd())
+        {
+            retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+        }
+
+
+        //while (map->GameEnd())
+        //{
+        //    retval = recvn(sock, (char*)&map, sizeof(map), 0);
+        //    if (retval == SOCKET_ERROR)
+        //    {
+        //        err_display("recv()");
+        //        exit(1);
+        //    }
+        //}
+
     }
+
+    
+    //DWORD WINAPI KeyboardSend(LPVOID arg)
+    //{
+    //    int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
+    //    if (retval == SOCKET_ERROR) {
+    //        err_display((char*)"send()");
+    //        exit(1);
+    //    }
+
+    //}
+    //    
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -268,13 +245,43 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      500, 200, 800, 800, nullptr, nullptr, hInstance, nullptr);
+      0, 200, 800, 800, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
       return FALSE;
    }
+   int retval;
+   // 윈속 초기화
+   WSADATA wsa;
+   if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+       return 1;
+   // socket()
+   sock = socket(AF_INET, SOCK_STREAM, 0);
+   if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
+   // connect()
+   SOCKADDR_IN serveraddr; //서버와 통신용 소켓
+   ZeroMemory(&serveraddr, sizeof(serveraddr));
+   serveraddr.sin_family = AF_INET;
+   serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
+   serveraddr.sin_port = htons(SERVERPORT);
+   retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+
+   if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
+
+   // 데이터 통신에 사용할 변수
+   
+   retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
+   if (retval == SOCKET_ERROR) {
+       err_display((char*)"send()");
+       exit(1);
+   }
+
+   printf("\n 연결이 완료되었습니다.\n");
+
    map = new Map();
+   
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -289,7 +296,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
         ProtocolThread = CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
-        sendDirection.id = Player_id;
+        sendDirection.id = 1;
         break;
     case WM_PAINT:
         PAINTSTRUCT ps;
@@ -320,13 +327,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
         {
             sendDirection.dir = player.VerticalInput(wParam);
-            SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+  //          SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
         }
         if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
         {
             sendDirection.dir = player.HorizontalInput(wParam);
-            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+//            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
         }
+        int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+        if (retval == SOCKET_ERROR) {
+            err_display((char*)"send()");
+            exit(1);
+        }
+
     }
     break;
     case WM_TIMER:
@@ -335,7 +348,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         //    map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
         //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
         //    map->player[0].VerticalMove(map->player->VerticalInput(wParam));
-        map->Update();
+        //int retval = recv(sock, (char*)&map, sizeof(recvDirection), 0);
+        //if (retval == SOCKET_ERROR) {
+        //    err_display((char*)"recv()");
+        //    exit(1);
+        //}
+
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
 

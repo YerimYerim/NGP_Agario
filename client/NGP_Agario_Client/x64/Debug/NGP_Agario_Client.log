@@ -1,12 +1,3 @@
-﻿  Map.cpp
-  NGP_Agario_Client.cpp
-D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(167,14): warning C4101: 'buf' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(145,22): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
-  Player.cpp
-  코드를 생성하고 있습니다...
-D:\NGP_Agario\client\NGP_Agario_Client\Player.cpp(24): warning C4715: 'Player::HorizontalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
-D:\NGP_Agario\client\NGP_Agario_Client\Player.cpp(12): warning C4715: 'Player::VerticalInput': 모든 제어 경로에서 값을 반환하지는 않습니다.
-D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(140): warning C4715: 'Server_Thread': 모든 제어 경로에서 값을 반환하지는 않습니다.
-D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(180): warning C4715: 'KeyboardSend': 모든 제어 경로에서 값을 반환하지는 않습니다.
-  LINK : D:\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
+﻿  NGP_Agario_Client.cpp
+D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(145): warning C4715: 'Server_Thread': 모든 제어 경로에서 값을 반환하지는 않습니다.
   NGP_Agario_Client.vcxproj -> D:\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe
