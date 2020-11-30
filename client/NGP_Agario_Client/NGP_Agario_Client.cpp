@@ -165,19 +165,6 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
         exit(1);
     }
 
-    while (count)
-    {
-        retval = send(sock, buf, BUFSIZE, 0); // bufsize 만큼 읽음
-        if (retval == SOCKET_ERROR) {
-            err_display((char*)"send()");
-            exit(1);
-        }
-    }
-    retval = send(sock, buf, BUFSIZE, 0);
-    if (retval == SOCKET_ERROR) {
-        err_display((char*)"send()");
-        exit(1);
-    }
     closesocket(sock);
     // 윈속 종료
     WSACleanup();
