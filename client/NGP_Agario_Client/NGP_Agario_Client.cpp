@@ -44,144 +44,140 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 DWORD WINAPI Server_Thread(LPVOID arg);
 
 // 소켓함수 오류 출력 후 종료
-void err_quit(const char* msg)
-{
-    LPVOID IpMsgBuf;
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, WSAGetLastError(),
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR)&IpMsgBuf, 0, NULL);
-    MessageBox(NULL, (LPCTSTR)IpMsgBuf, (LPCTSTR)msg, MB_ICONERROR);
-    LocalFree(IpMsgBuf);
-    exit(-1);
-}
-
-// 소켓 함수 오류 출력
-void err_display(const char* msg)
-{
-    LPVOID IpMsgBuf;
-    FormatMessage(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        NULL, WSAGetLastError(),
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR)&IpMsgBuf, 0, NULL);
-    printf("[%s] %s", msg, (LPCTSTR)IpMsgBuf);
-    LocalFree(IpMsgBuf);
-}
-
-int recvn(SOCKET s, char* buf, int len, int flags)
-{
-    int received;
-    char* ptr = buf;
-    int left = len;
-
-    while (left > 0) {
-        received = recv(s, ptr, left, flags);
-        if (received == SOCKET_ERROR)
-            return SOCKET_ERROR;
-        else if (received == 0)
-            break;
-        left -= received;
-        ptr += received;
-    }
-
-    return (len - left);
-}
-
-
-DWORD WINAPI Server_Thread(LPVOID arg)
-{
-    int retval;
-
-    retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
-    if (retval != WAIT_OBJECT_0)
-        return 1;
-      
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        return 1;
-
-    // socket()
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == INVALID_SOCKET)
-        err_quit("socket()");
-
-    // connect()
-    SOCKADDR_IN serveraddr;
-    ZeroMemory(&serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); // 수정 18.11.17 (이재원)
-    serveraddr.sin_port = htons(SERVERPORT); // 수정 18.11.17 (이재원)
-    retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-    if (retval == SOCKET_ERROR)
-        err_quit("connect()");
-    
-    // 플레이어 id 수신
-    retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
-    cout << "recv " << endl;
-    if (retval == SOCKET_ERROR) {
-        err_display("recv() - Player_id");
-        exit(1);
-        }
-    TerminateThread(ProtocolThread, NULL);
-}
-
-
-DWORD WINAPI KeyboardSend(LPVOID wParam)
-{
-    unsigned int count;
-
-    int retval;
-    WSADATA wsa;
-   
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-        return 1;
-
-    SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
-    
-    SOCKADDR_IN serveraddr; //서버와 통신용 소켓
-    ZeroMemory(&serveraddr, sizeof(serveraddr));
-    serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
-    serveraddr.sin_port = htons(SERVERPORT);
-    retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-
-    if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
-
-    // 데이터 통신에 사용할 변수
-    char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
-                       //파일 기본 정보 전송
-
-    retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
-    if (retval == SOCKET_ERROR) {
-        err_display((char*)"send()");
-        exit(1);
-    }
-
-    while (count)
+    void err_quit(const char* msg)
     {
-        retval = send(sock, buf, BUFSIZE, 0); // bufsize 만큼 읽음
+        LPVOID IpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL, WSAGetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&IpMsgBuf, 0, NULL);
+        MessageBox(NULL, (LPCTSTR)IpMsgBuf, (LPCTSTR)msg, MB_ICONERROR);
+        LocalFree(IpMsgBuf);
+        exit(-1);
+    }
+
+    // 소켓 함수 오류 출력
+    void err_display(const char* msg)
+    {
+        LPVOID IpMsgBuf;
+        FormatMessage(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER |
+            FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL, WSAGetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPTSTR)&IpMsgBuf, 0, NULL);
+        printf("[%s] %s", msg, (LPCTSTR)IpMsgBuf);
+        LocalFree(IpMsgBuf);
+    }
+
+    int recvn(SOCKET s, char* buf, int len, int flags)
+    {
+        int received;
+        char* ptr = buf;
+        int left = len;
+
+        while (left > 0) {
+            received = recv(s, ptr, left, flags);
+            if (received == SOCKET_ERROR)
+                return SOCKET_ERROR;
+            else if (received == 0)
+                break;
+            left -= received;
+            ptr += received;
+        }
+
+        return (len - left);
+    }
+
+
+    DWORD WINAPI Server_Thread(LPVOID arg)
+    {
+        int retval;
+
+        retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
+        if (retval != WAIT_OBJECT_0)
+            return 1;
+      
+        WSADATA wsa;
+        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+            return 1;
+
+        // socket()
+        sock = socket(AF_INET, SOCK_STREAM, 0);
+        if (sock == INVALID_SOCKET)
+            err_quit("socket()");
+
+        // connect()
+        SOCKADDR_IN serveraddr;
+        ZeroMemory(&serveraddr, sizeof(serveraddr));
+        serveraddr.sin_family = AF_INET;
+        serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); // 수정 18.11.17 (이재원)
+        serveraddr.sin_port = htons(SERVERPORT); // 수정 18.11.17 (이재원)
+        retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+        if (retval == SOCKET_ERROR)
+            err_quit("connect()");
+    
+        // 플레이어 id 수신
+        retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
+        cout << "recv " << endl;
+        if (retval == SOCKET_ERROR)
+        {
+            err_display("recv() - Player_id");
+            exit(1);
+        }
+        while (map->GameEnd())
+        {
+            retval = recvn(sock, (char*)&map, sizeof(map), 0);
+            if (retval == SOCKET_ERROR)
+            {
+                err_display("recv()");
+                exit(1);
+            }
+        }
+
+    }
+
+
+    DWORD WINAPI KeyboardSend(LPVOID wParam)
+    {
+        unsigned int count;
+
+        int retval;
+        WSADATA wsa;
+   
+        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+            return 1;
+
+        SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
+
+        if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
+    
+        SOCKADDR_IN serveraddr; //서버와 통신용 소켓
+        ZeroMemory(&serveraddr, sizeof(serveraddr));
+        serveraddr.sin_family = AF_INET;
+        serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
+        serveraddr.sin_port = htons(SERVERPORT);
+        retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+
+        if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
+
+        // 데이터 통신에 사용할 변수
+        char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
+                           //파일 기본 정보 전송
+
+        retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
         if (retval == SOCKET_ERROR) {
             err_display((char*)"send()");
             exit(1);
         }
+        closesocket(sock);
+        // 윈속 종료
+        WSACleanup();
+        //파일포인터 닫기
+        TerminateThread(SendKeyBoardThreadVertical, NULL);
     }
-    retval = send(sock, buf, BUFSIZE, 0);
-    if (retval == SOCKET_ERROR) {
-        err_display((char*)"send()");
-        exit(1);
-    }
-    closesocket(sock);
-    // 윈속 종료
-    WSACleanup();
-    //파일포인터 닫기
-    TerminateThread(SendKeyBoardThreadVertical, NULL);
-}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
