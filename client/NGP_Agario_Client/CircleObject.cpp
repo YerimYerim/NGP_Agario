@@ -21,6 +21,13 @@ void CircleObject::SetSize(int nsize)
     size = nsize;
 }
 
+void CircleObject::SetRGB(int r, int g, int b)
+{
+    R = r;
+    G = g;
+    B = b;
+}
+
 int CircleObject::GetSize()
 {
     return size;
@@ -50,7 +57,7 @@ void CircleObject::Draw(HDC hdc)
 
 void CircleObject::SetRandomPosition()
 {
-    std::default_random_engine dre(rand());
+    std::default_random_engine dre(rand()+1);
     std::uniform_int_distribution<unsigned int> uid(20, 780);
     std::uniform_int_distribution<unsigned int> color(0, 250);
     int x = uid(dre);

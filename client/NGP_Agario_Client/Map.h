@@ -7,9 +7,12 @@ class Map
 	const int Maxfeed = 500;
 
 public:
+
 	Map();
 	int PlayerNum = 1;
 	Player* player;
+	CircleObject* GetFeed();
+
 	void Update();
 	void Draw(HDC hdc);
 	void CrashCheckFeedAndPlayer();
@@ -18,6 +21,7 @@ public:
 	BOOL GameEnd();
 	CircleObject MakeRandomFeed();
 
+	void Set(char* packet);
 };
 
 

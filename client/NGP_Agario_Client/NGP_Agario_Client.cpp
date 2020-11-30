@@ -31,7 +31,7 @@ WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입
 WCHAR szWindowClass[MAX_LOADSTRING];            // 기본 창 클래스 이름입니다.
 CircleObject Circle;
 Player player;
-Map* map;
+Map map;
 
 // 이 코드 모듈에 포함된 함수의 선언을 전달합니다:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -126,7 +126,7 @@ DWORD WINAPI Server_Thread(LPVOID arg);
             err_display((char*)"send()");
         }
 
-        while (!map->GameEnd())
+        while (!map.GameEnd())
         {
             retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
         }
@@ -279,9 +279,30 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    }
 
    printf("\n 연결이 완료되었습니다.\n");
-
-   map = new Map();
    
+   if (map.GetFeed() == nullptr)
+   {
+       printf("하하하하하하하하하ㅏ핳");
+   }
+   else
+   {
+
+   }
+ 
+   int length;
+   retval = recv(sock,(char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+   printf("%d = length\n", length);
+   char* mapdata = new char[length -sizeof(int)];
+   retval = recv(sock,mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+   map.Set(mapdata);
+        
+   for (int i = 0; i < 500; i++)
+   {
+       printf(" %d  = %d\n", i, map.GetFeed()[i].GetPosition().x);
+   }
+   printf("\n\n\n\n\n");
+
+   //cout << "맵 크기~~?" << sizeof(map) << endl;
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -311,7 +332,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         oldBackBit = (HBITMAP)SelectObject(hdc, BackBit);
         PatBlt(hdc, 0, 0, bufferRT.right, bufferRT.bottom, WHITENESS);
         // draw 하는부분
-        map->Draw(hdc);
+        map.Draw(hdc);
         GetClientRect(hWnd, &bufferRT);
         BitBlt(MemDC, 0, 0, bufferRT.right, bufferRT.bottom, hdc, 0, 0, SRCCOPY);
         SelectObject(hdc, oldBackBit);

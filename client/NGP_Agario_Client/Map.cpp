@@ -19,6 +19,11 @@ Map::Map()
 	//AddPlayer();
 }
 
+CircleObject* Map::GetFeed()
+{
+	return this->feed;
+}
+
 void Map::Update()
 {
 	if (GameEnd())
@@ -113,4 +118,66 @@ CircleObject Map::MakeRandomFeed()
 	object->SetRandomPosition();
 	object->SetSize(10);
 	return *object;
+}
+
+void Map::Set(char* packet)
+{
+	std::string _packet = packet;
+	
+	auto Split = [](std::string& packetData, const char splitword)
+	{
+		int pos = packetData.find(splitword);
+		if (pos == std::string::npos) return std::string("");
+
+		std::string token = packetData.substr(0, pos);
+		packetData.erase(0, pos + sizeof(splitword));
+
+		return token;
+	};
+	
+	// 앞의 정보 ( 좌표, 색상 )
+	std::string front = Split(_packet, '>');
+	printf("_packet? %s\n", _packet.c_str());
+	printf("front? %s\n", front.c_str());
+	std::string info = "";
+	int count = 0;
+	while (true)
+	{
+		info = Split(front, '|');
+		if (info.empty())
+		{
+			break;
+		}
+
+		int x = atoi(Split(info, ',').c_str());
+		int y = atoi(Split(info, ',').c_str());
+		int r = atoi(Split(info, ',').c_str());
+		int g = atoi(Split(info, ',').c_str());
+		int b = atoi(info.c_str());
+
+		Position position = Position(x, y);
+		this->feed[count].SetPosition(position);
+		this->feed[count].SetRGB(r, g, b);
+		printf("[Log] %d, %d, %d, %d, %d|", x, y, r, g, b);
+		count++;
+	}
+
+	std::string back = _packet;
+	count = 0;
+	while (true)
+	{
+		info = Split(back, '|');
+		if (info.empty()) break;
+
+		int x = atoi(Split(info, ',').c_str());
+		int y = atoi(Split(info, ',').c_str());
+		int score = atoi(Split(info, ',').c_str());
+		int size = atoi(info.c_str());
+
+		Position position = Position(x, y);
+		this->player[count].SetPosition(position);
+		this->player[count].SetScore(score);
+		this->player[count].SetSize(size);
+		count++;
+	}
 }
