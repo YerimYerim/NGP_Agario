@@ -9,7 +9,7 @@
 #include<vector>
 #include<chrono>
 #include<random>
-
+#include"Map.h"
 
 #define SERVERPORT 9000
 #define BUFSIZE 1024
@@ -17,8 +17,7 @@
 
 using namespace std::chrono;
 using namespace std;
-
-// 소켓 함수 오류 출력 후 종료
+Map map;
 void err_quit(const char* msg)
 {
 	LPVOID IpMsgBuf;
