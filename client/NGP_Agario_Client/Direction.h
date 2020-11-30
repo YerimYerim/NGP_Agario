@@ -9,3 +9,5 @@ struct SendDirection {
 	unsigned short id;
 	Direction dir;
 };
+
+

@@ -2,6 +2,7 @@
 #include <random>
 #include <time.h>
 
+
 Map::Map()
 {
 	feed = new CircleObject[Maxfeed];

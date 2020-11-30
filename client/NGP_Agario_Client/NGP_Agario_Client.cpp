@@ -8,6 +8,7 @@
 #include "Map.h"
 #include"Global.h"
 #include "ClientSend.h"
+#include<iostream>
 
 #define SERVERIP "127.0.0.1"
 #define SERVERPORT 9000
@@ -18,13 +19,14 @@
 
 // 서버
 SOCKET sock; // 소켓
-HANDLE MainEvent; // 이벤트
+HANDLE hMainEvent; // 이벤트
 unsigned short Player_id; // 플레이어 아디
 HANDLE ProtocolThread;
 HANDLE SendKeyBoardThreadVertical;
 HANDLE SendKeyBoardThreadHorizontal;
 HANDLE MapRecvHandle;
 SendDirection sendDirection;
+
 
 
 // 전역 변수:
@@ -98,7 +100,7 @@ DWORD WINAPI Server_Thread(LPVOID arg)
 {
     int retval;
 
-    retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
+    retval = WaitForSingleObject(hMainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
     if (retval != WAIT_OBJECT_0)
         return 1;
       
@@ -123,15 +125,36 @@ DWORD WINAPI Server_Thread(LPVOID arg)
     
     // 플레이어 id 수신
     retval = recvn(sock, (char*)&Player_id, sizeof(Player_id), 0);
-    cout << "recv " << endl;
+    cout << retval << endl;
     if (retval == SOCKET_ERROR) {
         err_display("recv() - Player_id");
         exit(1);
         }
+
+
+    /*
+
+    // 플레이어 초기 위치값 수신
+    retval = recvn(sock, (char*)&Player_Start, sizeof(Player_Start), 0);
+    if (retval == SOCKET_ERROR) {
+        err_display("recv()");
+        exit(1);
+    }
+    */
+    while (1) {
+        retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+        if (retval == SOCKET_ERROR) {
+            err_display("send()");
+            break;
+        }
+
+    }
+
     TerminateThread(ProtocolThread, NULL);
 }
 
 
+/*
 DWORD WINAPI KeyboardSend(LPVOID wParam)
 {
     unsigned int count;
@@ -145,7 +168,7 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
     SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
 
     if (sock == INVALID_SOCKET) err_quit((char*)"socket()");
-    
+
     SOCKADDR_IN serveraddr; //서버와 통신용 소켓
     ZeroMemory(&serveraddr, sizeof(serveraddr));
     serveraddr.sin_family = AF_INET;
@@ -153,7 +176,8 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
     serveraddr.sin_port = htons(SERVERPORT);
     retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
 
-    if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
+    if (retval == SOCKET_ERROR) 
+        err_quit((char*)"connect()");
 
     // 데이터 통신에 사용할 변수
     char buf[BUFSIZE]; //보낼 데이터를 저장할 공간
@@ -165,25 +189,14 @@ DWORD WINAPI KeyboardSend(LPVOID wParam)
         exit(1);
     }
 
-    while (count)
-    {
-        retval = send(sock, buf, BUFSIZE, 0); // bufsize 만큼 읽음
-        if (retval == SOCKET_ERROR) {
-            err_display((char*)"send()");
-            exit(1);
-        }
-    }
-    retval = send(sock, buf, BUFSIZE, 0);
-    if (retval == SOCKET_ERROR) {
-        err_display((char*)"send()");
-        exit(1);
-    }
+    
     closesocket(sock);
     // 윈속 종료
     WSACleanup();
     //파일포인터 닫기
     TerminateThread(SendKeyBoardThreadVertical, NULL);
 }
+*/
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -195,13 +208,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     // TODO: 여기에 코드를 입력합니다.
 
-    MainEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (MainEvent == NULL)
+    hMainEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (hMainEvent == NULL)
         return 1;
-
-
-
-
+   
+    CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
+   
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -322,16 +334,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         // 여기에서 센드 메시지 하면 될듯
         //KeyboardSend
-
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
         {
             sendDirection.dir = player.VerticalInput(wParam);
-            SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+            std::cout << sendDirection.dir << std::endl;
+          //  SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL); 
         }
         if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
         {
             sendDirection.dir = player.HorizontalInput(wParam);
-            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+            std::cout << sendDirection.dir << std::endl;
+          //  SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
         }
     }
     break;
