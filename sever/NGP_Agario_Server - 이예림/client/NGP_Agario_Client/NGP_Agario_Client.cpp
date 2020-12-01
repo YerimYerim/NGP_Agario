@@ -119,6 +119,10 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     map.Update();
     retval = send(client_sock, (char*)&size, sizeof(int), 0); // 사이즈 먼저 전송
     retval = send(client_sock, str, packet.length(), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
+
+    std::string pack = "";
+
     while (!map.GameEnd())
     {
         retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
@@ -130,12 +134,11 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
         map.player[recvDirection.id].HorizontalMove(recvDirection.dir);
         //cout << "이동 받음" << endl;
         map.Update();
-
-        std::string packet;
-        const char* str = map.GetPacket(packet);
-        int size = packet.length();
-        retval = send(client_sock, (char*)&size, sizeof(int), 0); // 사이즈 먼저 전송
-        retval = send(client_sock, str, packet.length(), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+        pack = "";
+        const char* Str = map.GetPacket(pack);
+        int Size = pack.length();
+        retval = send(client_sock, (char*)&Size, sizeof(int), 0); // 사이즈 먼저 전송
+        retval = send(client_sock, Str, Size, 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
     }
     return 0;
 }

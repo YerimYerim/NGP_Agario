@@ -355,6 +355,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         char* mapdata = new char[length - sizeof(int)];
         retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
         map.Set(mapdata);
+        delete[] mapdata;
     }
     break;
     case WM_TIMER:

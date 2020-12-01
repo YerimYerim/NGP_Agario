@@ -2,9 +2,8 @@
   NGP_Agario_Client.cpp
 D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(117,31): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(121,55): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(136,35): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(138,59): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(139,33): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(97,10): warning C4101: 'buf' :참조되지 않은 지역 변수입니다.
 D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(99,18): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(270,17): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(273,17): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
   NGP_Agario_Client.vcxproj -> D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\x64\Debug\NGP_AGRIO_Sever.exe

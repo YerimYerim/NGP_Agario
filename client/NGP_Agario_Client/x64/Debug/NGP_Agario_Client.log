@@ -1,5 +1,2 @@
-﻿  Map.cpp
-D:\NGP_Agario\client\NGP_Agario_Client\Map.cpp(129,1): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  NGP_Agario_Client.cpp
-  코드를 생성하고 있습니다...
+﻿  NGP_Agario_Client.cpp
   NGP_Agario_Client.vcxproj -> D:\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe
