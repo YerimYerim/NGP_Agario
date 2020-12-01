@@ -9,7 +9,7 @@ Map::Map()
 	{
 		feed[i] = MakeRandomFeed();
 	}
-
+		
 	player = new Player[4];
 	for (int i = 0; i < PlayerNum; ++i)
 	{
@@ -17,11 +17,6 @@ Map::Map()
 		player->SetSize(50);
 	}
 	//AddPlayer();
-}
-
-CircleObject* Map::GetFeed()
-{
-	return this->feed;
 }
 
 void Map::Update()
@@ -78,7 +73,7 @@ void Map::CrashCheckPlayers()
 					player[j].SetRandomPosition();
 					player[j].SetSize(50);
 					player[j].SetScore(0);
-
+				
 				}
 				if (player[i].GetSize() < player[j].GetSize())
 				{
@@ -120,64 +115,41 @@ CircleObject Map::MakeRandomFeed()
 	return *object;
 }
 
-void Map::Set(char* packet)
+const char* Map::GetPacket(std::string& str)
 {
-	std::string _packet = packet;
-	
-	auto Split = [](std::string& packetData, const char splitword)
+	str = "";
+	int length = _msize(feed) / sizeof(CircleObject);
+#pragma region  Setting Packet
+	int R, G, B;
+	for (int i = 0; i < length; i++)
 	{
-		int pos = packetData.find(splitword);
-		if (pos == std::string::npos) return std::string("");
-
-		std::string token = packetData.substr(0, pos);
-		packetData.erase(0, pos + sizeof(splitword));
-
-		return token;
-	};
-	
-	// 앞의 정보 ( 좌표, 색상 )
-	std::string front = Split(_packet, '>');
-	//printf("_packet? %s\n", _packet.c_str());
-	//printf("front? %s\n", front.c_str());
-	std::string info = "";
-	int count = 0;
-	while (true)
-	{
-		info = Split(front, '|');
-		if (info.empty())
+		feed[i].ReferenceRGB(R, G, B);
+		str += std::to_string(feed[i].position.x) + ',' + std::to_string(feed[i].position.y) +','
+			+ std::to_string(R) + ',' + std::to_string(G) + ',' + std::to_string(B);
+		if (i < length - 1)
 		{
-			break;
+			// add split word
+			str += '|';
 		}
-
-		int x = atoi(Split(info, ',').c_str());
-		int y = atoi(Split(info, ',').c_str());
-		int r = atoi(Split(info, ',').c_str());
-		int g = atoi(Split(info, ',').c_str());
-		int b = atoi(info.c_str());
-
-		Position position = Position(x, y);
-		this->feed[count].SetPosition(position);
-		this->feed[count].SetRGB(r, g, b);
-		//printf("[Log] %d, %d, %d, %d, %d|", x, y, r, g, b);
-		count++;
 	}
-
-	std::string back = _packet;
-	count = 0;
-	while (true)
+	// add split word [ info '<' player info ]
+	str +='>';
+	for (int i = 0; i < 4; i++)
 	{
-		info = Split(back, '|');
-		if (info.empty()) break;
-
-		int x = atoi(Split(info, ',').c_str());
-		int y = atoi(Split(info, ',').c_str());
-		int score = atoi(Split(info, ',').c_str());
-		int size = atoi(info.c_str());
-
-		Position position = Position(x, y);
-		this->player[count].SetPosition(position);
-		this->player[count].SetScore(score);
-		this->player[count].SetSize(size);
-		count++;
+		str += std::to_string(player[i].GetPosition().x) + ',' +
+			std::to_string(player[i].GetPosition().y) + ',' +
+			std::to_string(player[i].GetScore()) + ',' +
+			std::to_string(player[i].GetSize());
+		
+		if (i < length - 1)
+		{
+			// add split word
+			str += '|';
+		}
 	}
+#pragma endregion
+
+//	std::cout << str << std::endl;
+
+	return str.c_str();
 }

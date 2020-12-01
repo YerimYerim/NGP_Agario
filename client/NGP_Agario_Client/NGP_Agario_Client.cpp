@@ -96,7 +96,7 @@ DWORD WINAPI Server_Thread(LPVOID arg);
     {
         int retval;
 
-        retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
+       retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
         if (retval != WAIT_OBJECT_0)
             return 1;
       
@@ -105,10 +105,6 @@ DWORD WINAPI Server_Thread(LPVOID arg);
             return 1;
 
         // socket()
-        sock = socket(AF_INET, SOCK_STREAM, 0);
-        if (sock == INVALID_SOCKET)
-            err_quit("socket()");
-
         // connect()
         SOCKADDR_IN serveraddr;
         ZeroMemory(&serveraddr, sizeof(serveraddr));
@@ -121,7 +117,7 @@ DWORD WINAPI Server_Thread(LPVOID arg);
   
         // 소캣 연결
 
-   //     retval = send(sock, (char*)Player_id, sizeof(Player_id), 0);
+        retval = send(sock, (char*)Player_id, sizeof(Player_id), 0);
         if (retval == INVALID_SOCKET) {
             err_display((char*)"send()");
         }
@@ -129,6 +125,16 @@ DWORD WINAPI Server_Thread(LPVOID arg);
         while (!map.GameEnd())
         {
             retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+
+
+            int length;
+            retval = recv(sock, (char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            char* mapdata = new char[length - sizeof(int)];         
+            retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
+            map.Set(mapdata);
+
+
         }
 
 
@@ -142,6 +148,7 @@ DWORD WINAPI Server_Thread(LPVOID arg);
         //    }
         //}
 
+        return 0;
     }
 
     
@@ -278,30 +285,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        exit(1);
    }
 
-   printf("\n 연결이 완료되었습니다.\n");
-   
-   if (map.GetFeed() == nullptr)
-   {
-       printf("하하하하하하하하하ㅏ핳");
-   }
-   else
-   {
-
-   }
- 
+   // 받는곳
    int length;
    retval = recv(sock,(char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-   printf("%d = length\n", length);
    char* mapdata = new char[length -sizeof(int)];
    retval = recv(sock,mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
    map.Set(mapdata);
         
-   for (int i = 0; i < 500; i++)
-   {
-       printf(" %d  = %d\n", i, map.GetFeed()[i].GetPosition().x);
-   }
-   printf("\n\n\n\n\n");
-
    //cout << "맵 크기~~?" << sizeof(map) << endl;
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
@@ -316,7 +306,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
-        ProtocolThread = CreateThread(NULL, 0, Server_Thread, NULL, 0, NULL);
+        ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
         sendDirection.id = 1;
         break;
     case WM_PAINT:
@@ -360,7 +350,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             err_display((char*)"send()");
             exit(1);
         }
-
+        int length;
+        retval = recv(sock, (char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+        char* mapdata = new char[length - sizeof(int)];
+        retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+        map.Set(mapdata);
     }
     break;
     case WM_TIMER:
