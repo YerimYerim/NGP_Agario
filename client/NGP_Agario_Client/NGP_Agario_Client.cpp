@@ -96,10 +96,10 @@ DWORD WINAPI Server_Thread(LPVOID arg);
     {
         int retval;
 
-       retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
-        if (retval != WAIT_OBJECT_0)
-            return 1;
-      
+      //// retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
+      //  if (retval != WAIT_OBJECT_0)
+      //      return 1;
+      //
         WSADATA wsa;
         if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
             return 1;
@@ -109,11 +109,11 @@ DWORD WINAPI Server_Thread(LPVOID arg);
         SOCKADDR_IN serveraddr;
         ZeroMemory(&serveraddr, sizeof(serveraddr));
         serveraddr.sin_family = AF_INET;
-        serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); // 수정 18.11.17 (이재원)
-        serveraddr.sin_port = htons(SERVERPORT); // 수정 18.11.17 (이재원)
-        retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-        if (retval == SOCKET_ERROR)
-            err_quit("connect()");
+        serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); 
+        serveraddr.sin_port = htons(SERVERPORT);
+        //retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
+        //if (retval == SOCKET_ERROR)
+        //    err_quit("connect()");
   
         // 소캣 연결
 
@@ -129,12 +129,10 @@ DWORD WINAPI Server_Thread(LPVOID arg);
 
             int length;
             retval = recv(sock, (char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-            char* mapdata = new char[length - sizeof(int)];         
+            char* mapdata = new char[length - sizeof(int)];
             retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-
             map.Set(mapdata);
-
-
+            delete[] mapdata;
         }
 
 
@@ -277,8 +275,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
 
    // 데이터 통신에 사용할 변수
-   
-   retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+   Player_id = 1;
+   retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0); 
 
    if (retval == SOCKET_ERROR) {
        err_display((char*)"send()");
@@ -306,7 +304,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
-        ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
+        //ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
         sendDirection.id = 1;
         break;
     case WM_PAINT:
@@ -334,6 +332,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         // 여기에서 센드 메시지 하면 될듯
         //KeyboardSend
+        if (wParam == VK_ESCAPE)
+        {
+            exit(1);
+        }
 
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
         {

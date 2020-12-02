@@ -130,8 +130,8 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
             err_display((char*)"recv()");
             exit(1);
         }
-        map.player[recvDirection.id].VerticalMove(recvDirection.dir);
-        map.player[recvDirection.id].HorizontalMove(recvDirection.dir);
+        map.player[/*recvDirection.id*/1].VerticalMove(recvDirection.dir);
+        map.player[/*recvDirection.id*/1].HorizontalMove(recvDirection.dir);
         //cout << "이동 받음" << endl;
         map.Update();
         pack = "";
@@ -329,18 +329,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_KEYDOWN:
     {
-
+        //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+        //{
+        //    /*sendDirection.dir = */map.player[0].VerticalInput(wParam);
+        //    //          SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+        //}
+        //if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+        //{
+        //    /*sendDirection.dir =*/ map.player[0].HorizontalInput(wParam);
+        //    //            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+        //}
+        if (wParam == VK_ESCAPE)
+        {
+            exit(1);
+        }
     }
     break;
     case WM_TIMER:
     {
-        for (int i = 0; i < map.PlayerNum; ++i)
+        for (int i = 0; i <1; ++i)
         {
             //if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-            //    map->player[i].HorizontalMove(map->player->HorizontalInput(wParam));
+            //    map.player[0].HorizontalMove(map.player[0].HorizontalInput(wParam));
             //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-            //    map->player[i].VerticalMove(map->player->VerticalInput(wParam));
-            map.Update();
+            //    map.player[0].VerticalMove(map.player[0].VerticalInput(wParam));
+            //map.Update();
         }
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
