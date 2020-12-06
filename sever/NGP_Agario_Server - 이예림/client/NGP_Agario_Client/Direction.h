@@ -7,5 +7,7 @@ enum Direction
 
 struct SendDirection {
 	unsigned short id;
-	Direction dir;
+	int x;
+	int y;
+	//Direction dir;
 };

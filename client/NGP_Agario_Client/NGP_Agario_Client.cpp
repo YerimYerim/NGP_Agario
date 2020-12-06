@@ -21,9 +21,6 @@ SOCKET sock; // 소켓
 HANDLE MainEvent; // 이벤트
 unsigned short Player_id; // 플레이어 아디
 HANDLE ProtocolThread;
-HANDLE SendKeyBoardThreadVertical;
-HANDLE SendKeyBoardThreadHorizontal;
-HANDLE MapRecvHandle;
 SendDirection sendDirection;
 // 전역 변수:
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -42,6 +39,8 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 // 서버 사용
 DWORD WINAPI Server_Thread(LPVOID arg);
+
+void GameSendRoutine(int& length);
 
 // 소켓함수 오류 출력 후 종료
     void err_quit(const char* msg)
@@ -95,71 +94,34 @@ DWORD WINAPI Server_Thread(LPVOID arg);
     DWORD WINAPI Server_Thread(LPVOID arg)
     {
         int retval;
-
-      //// retval = WaitForSingleObject(MainEvent, INFINITE); // 플레이어가 들어 올때 까지 기달
-      //  if (retval != WAIT_OBJECT_0)
-      //      return 1;
-      //
-        WSADATA wsa;
-        if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-            return 1;
-
-        // socket()
-        // connect()
-        SOCKADDR_IN serveraddr;
-        ZeroMemory(&serveraddr, sizeof(serveraddr));
-        serveraddr.sin_family = AF_INET;
-        serveraddr.sin_addr.s_addr = inet_addr(SERVERIP); 
-        serveraddr.sin_port = htons(SERVERPORT);
-        //retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
-        //if (retval == SOCKET_ERROR)
-        //    err_quit("connect()");
-  
-        // 소캣 연결
-
-        retval = send(sock, (char*)Player_id, sizeof(Player_id), 0);
+        retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0);
         if (retval == INVALID_SOCKET) {
             err_display((char*)"send()");
         }
-
+        sendDirection.id = 1;
+        int length;
         while (!map.GameEnd())
         {
-            retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
-
-
-            int length;
-            retval = recv(sock, (char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            sendDirection.x = map.player[1].position.x;
+            sendDirection.y = map.player[1].position.y;
+            int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"send()");
+                exit(1);
+            }
+            retval = recv(sock, (char*)&length, sizeof(int), 0); 
             char* mapdata = new char[length - sizeof(int)];
             retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
             map.Set(mapdata);
+            map.Update();
             delete[] mapdata;
         }
-
-
-        //while (map->GameEnd())
-        //{
-        //    retval = recvn(sock, (char*)&map, sizeof(map), 0);
-        //    if (retval == SOCKET_ERROR)
-        //    {
-        //        err_display("recv()");
-        //        exit(1);
-        //    }
-        //}
-
         return 0;
     }
 
-    
-    //DWORD WINAPI KeyboardSend(LPVOID arg)
-    //{
-    //    int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0); // Direction 전송
-    //    if (retval == SOCKET_ERROR) {
-    //        err_display((char*)"send()");
-    //        exit(1);
-    //    }
+  
 
-    //}
-    //    
+   
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -168,16 +130,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
-
-    // TODO: 여기에 코드를 입력합니다.
-
-    MainEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (MainEvent == NULL)
-        return 1;
-
-
-
-
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -289,8 +241,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    char* mapdata = new char[length -sizeof(int)];
    retval = recv(sock,mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
    map.Set(mapdata);
-        
-   //cout << "맵 크기~~?" << sizeof(map) << endl;
+   ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
+   //cout << "맵 크기~~?"  << sizeof(map) << endl;
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -304,7 +256,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
-        //ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
+
         sendDirection.id = 1;
         break;
     case WM_PAINT:
@@ -336,41 +288,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             exit(1);
         }
+       // int len;
+       // GameSendRoutine(len);
+//
+//        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+//        {
+//            sendDirection.dir = player.VerticalInput(wParam);
+//  //          SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+//        }
+//        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+//        {
+//            sendDirection.dir = player.HorizontalInput(wParam);
+////            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
+//        }
 
-        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-        {
-            sendDirection.dir = player.VerticalInput(wParam);
-  //          SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
-        }
-        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-        {
-            sendDirection.dir = player.HorizontalInput(wParam);
-//            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
-        }
-        int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
-        if (retval == SOCKET_ERROR) {
-            err_display((char*)"send()");
-            exit(1);
-        }
-        int length;
-        retval = recv(sock, (char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-        char* mapdata = new char[length - sizeof(int)];
-        retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-        map.Set(mapdata);
-        delete[] mapdata;
+
     }
     break;
     case WM_TIMER:
     {
-        //if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-        //    map->player[0].HorizontalMove(map->player->HorizontalInput(wParam));
-        //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-        //    map->player[0].VerticalMove(map->player->VerticalInput(wParam));
-        //int retval = recv(sock, (char*)&map, sizeof(recvDirection), 0);
-        //if (retval == SOCKET_ERROR) {
-        //    err_display((char*)"recv()");
-        //    exit(1);
-        //}
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+            map.player[1].HorizontalMove(map.player[1].HorizontalInput(wParam));
+        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+            map.player[1].VerticalMove(map.player[1].VerticalInput(wParam));
 
         InvalidateRect(hWnd, NULL, FALSE);
     }break;

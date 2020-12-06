@@ -104,12 +104,6 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     // 접속한 클라이언트 정보 출력
     //클라이언트로 부터 파일 기본 정보 받기
     SendDirection recvDirection;
-    //cout << "전송" << endl;
-    //if (retval == SOCKET_ERROR) {
-    //    err_display((char*)"recv()");
-    //    exit(1);
-    //}
-
     map.AddPlayer();
 
     std::string packet;
@@ -117,28 +111,36 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     int size = packet.length();
     retval = recv(client_sock, (char*)&Player_id, sizeof(Player_id), 0);
     map.Update();
+
     retval = send(client_sock, (char*)&size, sizeof(int), 0); // 사이즈 먼저 전송
-    retval = send(client_sock, str, packet.length(), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+    retval = send(client_sock, str, size, 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
 
 
     std::string pack = "";
+    const char* Str;
+    int Size;
 
+    Sleep(100);
     while (!map.GameEnd())
     {
+        pack = "";
         retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
+        Position* p = new Position(recvDirection.x, recvDirection.y);
+        p->SetPosition(recvDirection.x, recvDirection.y);
+        map.player[Player_id].SetPosition(*p);
+        map.Update();
+
         if (retval == SOCKET_ERROR) {
             err_display((char*)"recv()");
             exit(1);
         }
-        map.player[/*recvDirection.id*/1].VerticalMove(recvDirection.dir);
-        map.player[/*recvDirection.id*/1].HorizontalMove(recvDirection.dir);
-        //cout << "이동 받음" << endl;
-        map.Update();
-        pack = "";
-        const char* Str = map.GetPacket(pack);
-        int Size = pack.length();
+        
+        Str = map.GetPacket(pack);
+        Size = pack.length();
+        
         retval = send(client_sock, (char*)&Size, sizeof(int), 0); // 사이즈 먼저 전송
         retval = send(client_sock, Str, Size, 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+        delete p;
     }
     return 0;
 }
@@ -162,8 +164,7 @@ DWORD WINAPI FindNewClient(LPVOID listen_sock)
         }
         // 접속한 클라이언트 정보 출력
         int Player_id = 0;
-//        cout << "맵 크기~~?" << sizeof(map) << endl;
-        //retval = send(client_sock, (char*)map, sizeof(map), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
         printf("\n[TCP 서버] 클라이언트 접속: IP 주소=%s, 포트 번호=%d\n", inet_ntoa(clientaddr.sin_addr), ntohs(clientaddr.sin_port));
         printf("%d 번째 클라이언트", sockNum);
         hThread = CreateThread(NULL, 0, UpdateGame, (LPVOID)client_sock, 0, NULL);
@@ -347,14 +348,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_TIMER:
     {
-        for (int i = 0; i <1; ++i)
-        {
-            //if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-            //    map.player[0].HorizontalMove(map.player[0].HorizontalInput(wParam));
-            //if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-            //    map.player[0].VerticalMove(map.player[0].VerticalInput(wParam));
-            //map.Update();
-        }
+        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+             map.player[0].HorizontalMove(map.player[0].HorizontalInput(wParam));
+        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+             map.player[0].VerticalMove(map.player[0].VerticalInput(wParam));
+        
+        map.Update();
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
 

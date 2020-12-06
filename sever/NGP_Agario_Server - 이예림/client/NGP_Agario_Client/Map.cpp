@@ -38,7 +38,20 @@ void Map::Draw(HDC hdc)
 
 	for (int i = 0; i < PlayerNum; ++i)
 	{
+		char buffer[80];
 		player[i].Draw(hdc);
+
+		// score draw
+		sprintf(buffer, "score\n %d", player[i].GetScore());
+		SetBkMode(hdc, TRANSPARENT);
+		RECT rec = { player[i].position.x - player[i].GetSize() * 0.5, player[i].position.y - player[i].GetSize() * 0.2 , player[i].position.x + player[i].GetSize() * 0.5,player[i].position.y + player[i].GetSize()  };
+		DrawText(hdc, buffer, strlen(buffer), &rec, DT_CENTER);
+		
+		//id draw
+		char buffer2[80];
+		sprintf(buffer2, "id :%d" , i);
+		RECT rec2 = { player[i].position.x - player[i].GetSize()  , player[i].position.y + player[i].GetSize() * 0.5 , player[i].position.x + player[i].GetSize(), player[i].position.y + player[i].GetSize() * 1.5 };
+		DrawText(hdc, buffer2, strlen(buffer2), &rec2, DT_CENTER | DT_VCENTER);
 	}
 }
 
@@ -123,9 +136,9 @@ const char* Map::GetPacket(std::string& str)
 	int R, G, B;
 	for (int i = 0; i < length; i++)
 	{
-		feed[i].ReferenceRGB(R, G, B);
-		str += std::to_string(feed[i].position.x) + ',' + std::to_string(feed[i].position.y) +','
-			+ std::to_string(R) + ',' + std::to_string(G) + ',' + std::to_string(B);
+		//feed[i].ReferenceRGB(R, G, B);
+		str += std::to_string(feed[i].position.x) + ',' + std::to_string(feed[i].position.y) + ',';
+			//+ std::to_string(R) + ',' + std::to_string(G) + ',' + std::to_string(B);
 		if (i < length - 1)
 		{
 			// add split word
