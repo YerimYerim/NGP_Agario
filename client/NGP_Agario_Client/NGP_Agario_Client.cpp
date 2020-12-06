@@ -103,23 +103,25 @@ void GameSendRoutine(int& length);
         player.position.x = 100;
         player.position.y = 100;
 
-        while (!map.GameEnd())
+        while (1)
         {
-            sendDirection.id = 1;
-            sendDirection.x = player.position.x;
-            sendDirection.y = player.position.y;
-            retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
-            if (retval == SOCKET_ERROR) {
-                err_display((char*)"send()");
-                exit(1);
-            }
-            retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-            if (retval == SOCKET_ERROR) {
-                err_display((char*)"send()");
-                exit(1);
-            }
-            map.Update();
-            map.Set(temp);
+
+                sendDirection.id = 1;
+                sendDirection.x = player.position.x;
+                sendDirection.y = player.position.y;
+                retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+                if (retval == SOCKET_ERROR) {
+                    err_display((char*)"send()");
+                    exit(1);
+                }
+                retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+                if (retval == SOCKET_ERROR) {
+                    err_display((char*)"send()");
+                    exit(1);
+                }
+                map.Update();
+                map.Set(temp);
+
         }
         return 0;
     }
@@ -268,7 +270,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         static HBITMAP BackBit, oldBackBit;
         static RECT bufferRT;
         MemDC = BeginPaint(hWnd, &ps);
-
         GetClientRect(hWnd, &bufferRT);
         hdc = CreateCompatibleDC(MemDC);
         BackBit = CreateCompatibleBitmap(MemDC, bufferRT.right, bufferRT.bottom);
@@ -276,6 +277,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PatBlt(hdc, 0, 0, bufferRT.right, bufferRT.bottom, WHITENESS);
         // draw 하는부분
         map.Draw(hdc);
+        if (map.GameEnd())
+        {
+            if (map.player[0].GetSize() > map.player[1].GetSize())
+            {
+                TextOut(hdc, 0, 0, "PLAYER 0 WIN", 12);
+            }
+            else
+            {
+                TextOut(hdc, 0, 0, "PLAYER 1 WIN", 12);
+            }
+            TextOut(hdc, 0, 20, "WAITING FOR SEVER RESTART", 25);
+        }
         GetClientRect(hWnd, &bufferRT);
         BitBlt(MemDC, 0, 0, bufferRT.right, bufferRT.bottom, hdc, 0, 0, SRCCOPY);
         SelectObject(hdc, oldBackBit);
@@ -310,11 +323,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_TIMER:
     {
-        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-            player.HorizontalMove(player.HorizontalInput(wParam));
-        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-            player.VerticalMove(player.VerticalInput(wParam));
-
+        if (!map.GameEnd())
+        {
+            if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+                player.HorizontalMove(player.HorizontalInput(wParam));
+            if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+                player.VerticalMove(player.VerticalInput(wParam));
+        }
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
 

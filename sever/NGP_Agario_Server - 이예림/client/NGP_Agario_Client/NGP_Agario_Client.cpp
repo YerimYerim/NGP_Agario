@@ -1,5 +1,6 @@
 ﻿// NGP_Agario_Client.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+#pragma comment(lib, "ws2_32.lib")
 
 #include "framework.h"
 #include "Map.h"
@@ -134,28 +135,29 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     int Size;
     mapPack Pack;
 
-    while (!map.GameEnd())
-    {     
-        retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
-        Position* p = new Position(recvDirection.x, recvDirection.y);
+    while (1)
+    {   
+             retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
+            Position* p = new Position(recvDirection.x, recvDirection.y);
 
-        p->SetPosition(recvDirection.x, recvDirection.y);
-        map.player[recvDirection.id].SetPosition(*p);
+            p->SetPosition(recvDirection.x, recvDirection.y);
+            map.player[recvDirection.id].SetPosition(*p);
 
-        if (retval == SOCKET_ERROR) {
-            err_display((char*)"recv()");
-            exit(1);
-        }
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"recv()");
+                exit(1);
+            }
 
-        Pack = map.GetPacket();
+            Pack = map.GetPacket();
 
-        retval = send(client_sock, (char*)&Pack, sizeof(Pack), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-        if (retval == SOCKET_ERROR) {
-            err_display((char*)"send()");
-            exit(1);
-        }
-        map.Update();
-        delete p;
+            retval = send(client_sock, (char*)&Pack, sizeof(Pack), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"send()");
+                exit(1);
+            }
+            map.Update();
+            delete p;
+
     }
     return 0;
 }
@@ -324,13 +326,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
         Restartbutton = CreateWindow(TEXT("button"), TEXT("ReStart"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,650,0, 100, 50, hWnd, (HMENU)STARTID, hInst, NULL);
-
         break;
     case WM_COMMAND:
         switch (LOWORD(wParam))
         {
         case STARTID:
-            std::cout << "ButtonOn";
+            for (int i = 0; i < 2; ++i)
+            {
+                map.player[i].SetRandomPosition();
+                map.player[i].SetScore(4);
+                map.player[i].SetSize(50);
+            }
         }
         break;
     case WM_PAINT:
@@ -347,6 +353,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         PatBlt(hdc, 0, 0, bufferRT.right, bufferRT.bottom, WHITENESS);
         // draw 하는부분
         map.Draw(hdc);
+        if (map.GameEnd())
+        {
+            if (map.player[0].GetSize() > map.player[1].GetSize())
+            {
+                TextOut(hdc, 0, 0, "PLAYER 0 WIN", 12);
+            }
+            else
+            {
+                TextOut(hdc, 0, 0, "PLAYER 1 WIN", 12);
+            }
+            TextOut(hdc, 0, 25, "PRESS RESTART", 13);
+
+        }
+
         GetClientRect(hWnd, &bufferRT);
         BitBlt(MemDC, 0, 0, bufferRT.right, bufferRT.bottom, hdc, 0, 0, SRCCOPY);
         SelectObject(hdc, oldBackBit);
@@ -374,11 +394,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_TIMER:
     {
-        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-             map.player[0].HorizontalMove(map.player[0].HorizontalInput(wParam));
-        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-             map.player[0].VerticalMove(map.player[0].VerticalInput(wParam));
-        
+        if (!map.GameEnd())
+        {
+            if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+                map.player[0].HorizontalMove(map.player[0].HorizontalInput(wParam));
+            if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+                map.player[0].VerticalMove(map.player[0].VerticalInput(wParam));
+        }
         map.Update();
         InvalidateRect(hWnd, NULL, FALSE);
     }break;

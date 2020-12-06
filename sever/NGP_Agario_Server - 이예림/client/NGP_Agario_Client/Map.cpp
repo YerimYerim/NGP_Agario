@@ -21,10 +21,7 @@ Map::Map()
 
 void Map::Update()
 {
-	if (GameEnd())
-	{
-		exit(1);
-	}
+
 	CrashCheckFeedAndPlayer();
 	CrashCheckPlayers();
 }
