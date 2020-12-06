@@ -134,15 +134,18 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     const char* Str;
     int Size;
     mapPack Pack;
-
+    bool flag = false;
     while (1)
     {   
-             retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
-            Position* p = new Position(recvDirection.x, recvDirection.y);
-
-            p->SetPosition(recvDirection.x, recvDirection.y);
-            map.player[recvDirection.id].SetPosition(*p);
-
+            retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
+            if (flag == false)
+            {
+                Position* p = new Position(recvDirection.x, recvDirection.y);
+                p->SetPosition(recvDirection.x, recvDirection.y);
+                map.player[recvDirection.id].SetPosition(*p);
+                delete p;
+            }
+          
             if (retval == SOCKET_ERROR) {
                 err_display((char*)"recv()");
                 exit(1);
@@ -155,8 +158,8 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
                 err_display((char*)"send()");
                 exit(1);
             }
-            map.Update();
-            delete p;
+            flag = map.Update();
+          
 
     }
     return 0;

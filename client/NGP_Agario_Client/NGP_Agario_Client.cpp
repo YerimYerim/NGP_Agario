@@ -106,21 +106,21 @@ void GameSendRoutine(int& length);
         while (1)
         {
 
-                sendDirection.id = 1;
-                sendDirection.x = player.position.x;
-                sendDirection.y = player.position.y;
-                retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
-                if (retval == SOCKET_ERROR) {
-                    err_display((char*)"send()");
-                    exit(1);
-                }
-                retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-                if (retval == SOCKET_ERROR) {
-                    err_display((char*)"send()");
-                    exit(1);
-                }
-                map.Update();
-                map.Set(temp);
+            sendDirection.id = 1;
+            sendDirection.x = player.position.x;
+            sendDirection.y = player.position.y;
+            retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"send()");
+                exit(1);
+            }
+            retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"send()");
+                exit(1);
+            }
+            map.Update();
+            map.Set(temp);
 
         }
         return 0;
@@ -323,13 +323,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     break;
     case WM_TIMER:
     {
-        if (!map.GameEnd())
-        {
-            if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-                player.HorizontalMove(player.HorizontalInput(wParam));
-            if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-                player.VerticalMove(player.VerticalInput(wParam));
-        }
+        //if (!map.GameEnd())
+        //{
+        //    if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+        //        player.HorizontalMove(player.HorizontalInput(wParam));
+        //    if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+        //        player.VerticalMove(player.VerticalInput(wParam));
+        //}
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
 

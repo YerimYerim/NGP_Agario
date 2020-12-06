@@ -19,11 +19,10 @@ Map::Map()
 	//AddPlayer();
 }
 
-void Map::Update()
+bool Map::Update()
 {
-
 	CrashCheckFeedAndPlayer();
-	CrashCheckPlayers();
+	return CrashCheckPlayers();
 }
 
 void Map::Draw(HDC hdc)
@@ -68,8 +67,9 @@ void Map::CrashCheckFeedAndPlayer()
 	}
 }
 
-void Map::CrashCheckPlayers()
+bool Map::CrashCheckPlayers()
 {
+	bool flag = false;
 	for (int i = 0; i < PlayerNum; ++i)
 	{
 		for (int j = i; j < PlayerNum; ++j)
@@ -83,7 +83,6 @@ void Map::CrashCheckPlayers()
 					player[j].SetRandomPosition();
 					player[j].SetSize(50);
 					player[j].SetScore(0);
-				
 				}
 				if (player[i].GetSize() < player[j].GetSize())
 				{
@@ -93,9 +92,12 @@ void Map::CrashCheckPlayers()
 					player[i].SetSize(50);
 					player[i].SetScore(0);
 				}
+				flag = true;
 			}
 		}
 	}
+
+	return flag;
 }
 
 void Map::AddPlayer()

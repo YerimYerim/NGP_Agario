@@ -12,10 +12,10 @@ public:
 	Map();
 	int PlayerNum = 1;
 	Player* player;
-	void Update();
+	bool Update();
 	void Draw(HDC hdc);
 	void CrashCheckFeedAndPlayer();
-	void CrashCheckPlayers();
+	bool CrashCheckPlayers();
 	void AddPlayer();
 	BOOL GameEnd();
 	CircleObject MakeRandomFeed();
