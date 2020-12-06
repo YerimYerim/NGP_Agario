@@ -20,7 +20,7 @@ public:
 	BOOL GameEnd();
 	CircleObject MakeRandomFeed();
 
-	const char* GetPacket(std::string& );
+	mapPack GetPacket();
 };
 
 

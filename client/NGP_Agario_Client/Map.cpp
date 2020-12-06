@@ -133,64 +133,18 @@ CircleObject Map::MakeRandomFeed()
 	return *object;
 }
 
-void Map::Set(char* packet)
+void Map::Set(mapPack packet)
 {
-	std::string _packet = packet;
-	
-	auto Split = [](std::string& packetData, const char splitword)
+	for (int i = 0; i < 500; ++i)
 	{
-		int pos = packetData.find(splitword);
-		if (pos == std::string::npos) return std::string("");
-
-		std::string token = packetData.substr(0, pos);
-		packetData.erase(0, pos + sizeof(splitword));
-
-		return token;
-	};
-	
-	// 앞의 정보 ( 좌표, 색상 )
-	std::string front = Split(_packet, '>');
-	//printf("_packet? %s\n", _packet.c_str());
-	//printf("front? %s\n", front.c_str());
-	std::string info = "";
-	int count = 0;
-	while (true)
-	{
-		info = Split(front, '|');
-		if (info.empty())
-		{
-			break;
-		}
-
-		int x = atoi(Split(info, ',').c_str());
-		int y = atoi(Split(info, ',').c_str());
-		//int r = atoi(Split(info, ',').c_str());
-		//int g = atoi(Split(info, ',').c_str());
-		//int b = atoi(info.c_str());
-
-		Position position = Position(x, y);
-		this->feed[count].SetPosition(position);
-		//this->feed[count].SetRGB(r, g, b);
-		//printf("[Log] %d, %d, %d, %d, %d|", x, y, r, g, b);
-		count++;
+		feed[i].position.x=packet.feedX[i];
+		feed[i].position.y=packet.feedY[i];
 	}
-
-	std::string back = _packet;
-	count = 0;
-	while (true)
+	for (int i = 0; i < 2; ++i)
 	{
-		info = Split(back, '|');
-		if (info.empty()) break;
-
-		int x = atoi(Split(info, ',').c_str());
-		int y = atoi(Split(info, ',').c_str());
-		int score = atoi(Split(info, ',').c_str());
-		int size = atoi(info.c_str());
-
-		Position position = Position(x, y);
-		this->player[count].SetPosition(position);
-		this->player[count].SetScore(score);
-		this->player[count].SetSize(size);
-		count++;
+		player[i].position.x= packet.PlayerX[i];
+		player[i].position.y= packet.PlayerY[i];
+		player[i].SetSize( packet.PlayerSize[i]);
+		player[i].SetScore(packet.PlayerScore[i]);
 	}
 }

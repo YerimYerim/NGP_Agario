@@ -2,20 +2,17 @@
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 
 #include "framework.h"
-#include "NGP_Agario_Client.h"
-#include "CircleObject.h"
-#include "Player.h"
 #include "Map.h"
-#include"Global.h"
+#include "Global.h"
 #include "ClientSend.h"
+#include "NGP_Agario_Client.h"
 
-#define SERVERIP "127.0.0.1"
 #define SERVERPORT 9000
 #define BUFSIZE 30000
-
+#define STARTID 22
 
 #define MAX_LOADSTRING 100
-
+HWND Restartbutton;
 // 서버
 SOCKET sock; // 소켓
 HANDLE MainEvent; // 이벤트
@@ -40,7 +37,27 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
 // 소켓함수 오류 출력 후 종료
 
+IN_ADDR GetDefaultMyIP()
+{
+    char localhostname[MAX_PATH];
+    IN_ADDR addr = { 0, };
 
+    if (gethostname(localhostname, MAX_PATH) == SOCKET_ERROR)//호스트 이름 얻어오기
+    {
+        return addr;
+    }
+    HOSTENT* ptr = gethostbyname(localhostname);//호스트 엔트리 얻어오기
+    while (ptr && ptr->h_name)
+    {
+        if (ptr->h_addrtype == PF_INET)//IPv4 주소 타입일 때
+        {
+            memcpy(&addr, ptr->h_addr_list[0], ptr->h_length);//메모리 복사
+            break;//반복문 탈출
+        }
+        ptr++;
+    }
+    return addr;
+}
 void err_quit(const char* msg)
 {
     LPVOID IpMsgBuf;
@@ -106,40 +123,38 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     SendDirection recvDirection;
     map.AddPlayer();
 
-    std::string packet;
-    const char* str = map.GetPacket(packet);
-    int size = packet.length();
+    mapPack pack;
+
+    pack = map.GetPacket();
     retval = recv(client_sock, (char*)&Player_id, sizeof(Player_id), 0);
+    retval = send(client_sock, (char*)&pack, sizeof(pack), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
     map.Update();
-
-    retval = send(client_sock, (char*)&size, sizeof(int), 0); // 사이즈 먼저 전송
-    retval = send(client_sock, str, size, 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-
-
-    std::string pack = "";
     const char* Str;
     int Size;
+    mapPack Pack;
 
-    Sleep(100);
     while (!map.GameEnd())
-    {
-        pack = "";
+    {     
         retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
         Position* p = new Position(recvDirection.x, recvDirection.y);
+
         p->SetPosition(recvDirection.x, recvDirection.y);
-        map.player[Player_id].SetPosition(*p);
-        map.Update();
+        map.player[recvDirection.id].SetPosition(*p);
 
         if (retval == SOCKET_ERROR) {
             err_display((char*)"recv()");
             exit(1);
         }
-        
-        Str = map.GetPacket(pack);
-        Size = pack.length();
-        
-        retval = send(client_sock, (char*)&Size, sizeof(int), 0); // 사이즈 먼저 전송
-        retval = send(client_sock, Str, Size, 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+
+        Pack = map.GetPacket();
+
+        retval = send(client_sock, (char*)&Pack, sizeof(Pack), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+        if (retval == SOCKET_ERROR) {
+            err_display((char*)"send()");
+            exit(1);
+        }
+        map.Update();
         delete p;
     }
     return 0;
@@ -292,6 +307,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    if (retval == SOCKET_ERROR) err_quit((char*)"listen()");
    FindNewPlayer = CreateThread(NULL, 0, FindNewClient, (LPVOID)listen_sock, 0, NULL);
 
+   IN_ADDR addr = GetDefaultMyIP();//디폴트 IPv4 주소 얻어오기
+   printf("Host IP: %s\n", inet_ntoa(addr));
+
    ShowWindow(hWnd, nCmdShow);
    UpdateWindow(hWnd);
 
@@ -305,7 +323,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
         SetTimer(hWnd, 1, 100, NULL);
+        Restartbutton = CreateWindow(TEXT("button"), TEXT("ReStart"), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,650,0, 100, 50, hWnd, (HMENU)STARTID, hInst, NULL);
 
+        break;
+    case WM_COMMAND:
+        switch (LOWORD(wParam))
+        {
+        case STARTID:
+            std::cout << "ButtonOn";
+        }
         break;
     case WM_PAINT:
         PAINTSTRUCT ps;

@@ -21,7 +21,7 @@ public:
 	BOOL GameEnd();
 	CircleObject MakeRandomFeed();
 
-	void Set(char* packet);
+	void Set(mapPack packet);
 };
 
 

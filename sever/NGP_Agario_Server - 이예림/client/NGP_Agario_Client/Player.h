@@ -1,7 +1,7 @@
 #pragma once
-#include "CircleObject.h"
-#include "Direction.h"
 #include <iostream>
+#include "Direction.h"
+#include "CircleObject.h"
 
 class Player : public CircleObject
 {

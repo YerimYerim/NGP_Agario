@@ -6,7 +6,7 @@
 #include "CircleObject.h"
 #include "Player.h"
 #include "Map.h"
-#include"Global.h"
+#include "Global.h"
 #include "ClientSend.h"
 
 #define SERVERIP "127.0.0.1"
@@ -94,27 +94,32 @@ void GameSendRoutine(int& length);
     DWORD WINAPI Server_Thread(LPVOID arg)
     {
         int retval;
-        retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0);
-        if (retval == INVALID_SOCKET) {
-            err_display((char*)"send()");
-        }
-        sendDirection.id = 1;
+        //retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0);
+        //if (retval == INVALID_SOCKET) {
+        //    err_display((char*)"send()");
+        //}
+        mapPack temp;
         int length;
+        player.position.x = 100;
+        player.position.y = 100;
+
         while (!map.GameEnd())
         {
-            sendDirection.x = map.player[1].position.x;
-            sendDirection.y = map.player[1].position.y;
-            int retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
+            sendDirection.id = 1;
+            sendDirection.x = player.position.x;
+            sendDirection.y = player.position.y;
+            retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
             if (retval == SOCKET_ERROR) {
                 err_display((char*)"send()");
                 exit(1);
             }
-            retval = recv(sock, (char*)&length, sizeof(int), 0); 
-            char* mapdata = new char[length - sizeof(int)];
-            retval = recv(sock, mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-            map.Set(mapdata);
+            retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            if (retval == SOCKET_ERROR) {
+                err_display((char*)"send()");
+                exit(1);
+            }
             map.Update();
-            delete[] mapdata;
+            map.Set(temp);
         }
         return 0;
     }
@@ -200,7 +205,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
-
+   char severIP[100];
+   std::cin >> severIP;
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       0, 200, 800, 800, nullptr, nullptr, hInstance, nullptr);
 
@@ -220,7 +226,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    SOCKADDR_IN serveraddr; //서버와 통신용 소켓
    ZeroMemory(&serveraddr, sizeof(serveraddr));
    serveraddr.sin_family = AF_INET;
-   serveraddr.sin_addr.s_addr = inet_addr(SeverIp);
+   serveraddr.sin_addr.s_addr = inet_addr(severIP);
    serveraddr.sin_port = htons(SERVERPORT);
    retval = connect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr));
 
@@ -234,13 +240,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
        err_display((char*)"send()");
        exit(1);
    }
-
+   mapPack temp;
    // 받는곳
-   int length;
-   retval = recv(sock,(char*)&length, sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-   char* mapdata = new char[length -sizeof(int)];
-   retval = recv(sock,mapdata, length - sizeof(int), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
-   map.Set(mapdata);
+   retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+   map.Set(temp);
    ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
    //cout << "맵 크기~~?"  << sizeof(map) << endl;
    ShowWindow(hWnd, nCmdShow);
@@ -308,9 +311,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_TIMER:
     {
         if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-            map.player[1].HorizontalMove(map.player[1].HorizontalInput(wParam));
+            player.HorizontalMove(player.HorizontalInput(wParam));
         if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-            map.player[1].VerticalMove(map.player[1].VerticalInput(wParam));
+            player.VerticalMove(player.VerticalInput(wParam));
 
         InvalidateRect(hWnd, NULL, FALSE);
     }break;

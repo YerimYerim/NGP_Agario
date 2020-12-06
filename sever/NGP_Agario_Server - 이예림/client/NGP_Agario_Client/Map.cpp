@@ -128,41 +128,55 @@ CircleObject Map::MakeRandomFeed()
 	return *object;
 }
 
-const char* Map::GetPacket(std::string& str)
+mapPack Map::GetPacket()
 {
-	str = "";
-	int length = _msize(feed) / sizeof(CircleObject);
-#pragma region  Setting Packet
-	int R, G, B;
-	for (int i = 0; i < length; i++)
+//	str = "";
+//	int length = _msize(feed) / sizeof(CircleObject);
+//#pragma region  Setting Packet
+//	int R, G, B;
+//	for (int i = 0; i < length; i++)
+//	{
+//		//feed[i].ReferenceRGB(R, G, B);
+//		str += std::to_string(feed[i].position.x) + ',' + std::to_string(feed[i].position.y) + ',';
+//			//+ std::to_string(R) + ',' + std::to_string(G) + ',' + std::to_string(B);
+//		if (i < length - 1)
+//		{
+//			// add split word
+//			str += '|';
+//		}
+//	}
+//	// add split word [ info '<' player info ]
+//	str +='>';
+//	for (int i = 0; i < 4; i++)
+//	{
+//		str += std::to_string(player[i].GetPosition().x) + ',' +
+//			std::to_string(player[i].GetPosition().y) + ',' +
+//			std::to_string(player[i].GetScore()) + ',' +
+//			std::to_string(player[i].GetSize());
+//		
+//		if (i < length - 1)
+//		{
+//			// add split word
+//			str += '|';
+//		}
+//	}
+//#pragma endregion
+//
+////	std::cout << str << std::endl;
+//
+//	return str.c_str();
+	mapPack Pack;
+	for (int i = 0; i < 500; ++i)
 	{
-		//feed[i].ReferenceRGB(R, G, B);
-		str += std::to_string(feed[i].position.x) + ',' + std::to_string(feed[i].position.y) + ',';
-			//+ std::to_string(R) + ',' + std::to_string(G) + ',' + std::to_string(B);
-		if (i < length - 1)
-		{
-			// add split word
-			str += '|';
-		}
+		Pack.feedX[i] = feed[i].position.x;
+		Pack.feedY[i] = feed[i].position.y;
 	}
-	// add split word [ info '<' player info ]
-	str +='>';
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 2; ++i)
 	{
-		str += std::to_string(player[i].GetPosition().x) + ',' +
-			std::to_string(player[i].GetPosition().y) + ',' +
-			std::to_string(player[i].GetScore()) + ',' +
-			std::to_string(player[i].GetSize());
-		
-		if (i < length - 1)
-		{
-			// add split word
-			str += '|';
-		}
+		Pack.PlayerX[i] = player[i].position.x;
+		Pack.PlayerY[i] = player[i].position.y;
+ 		Pack.PlayerSize[i] = player[i].GetSize();
+		Pack.PlayerScore[i] = player[i].GetScore();
 	}
-#pragma endregion
-
-//	std::cout << str << std::endl;
-
-	return str.c_str();
+	return Pack;
 }

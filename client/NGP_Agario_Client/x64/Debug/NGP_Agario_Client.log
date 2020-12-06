@@ -1,2 +1,3 @@
 ﻿  NGP_Agario_Client.cpp
+D:\NGP_Agario\client\NGP_Agario_Client\NGP_Agario_Client.cpp(102,13): warning C4101: 'length' :참조되지 않은 지역 변수입니다.
   NGP_Agario_Client.vcxproj -> D:\NGP_Agario\client\x64\Debug\NGP_Agario_Client.exe
