@@ -131,12 +131,13 @@ CircleObject Map::MakeRandomFeed()
 
 void Map::Set(mapPack packet)
 {
+	PlayerNum = packet.PlayerNum;
 	for (int i = 0; i < 500; ++i)
 	{
 		feed[i].position.x=packet.feedX[i];
 		feed[i].position.y=packet.feedY[i];
 	}
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < PlayerNum; ++i)
 	{
 		player[i].position.x= packet.PlayerX[i];
 		player[i].position.y= packet.PlayerY[i];

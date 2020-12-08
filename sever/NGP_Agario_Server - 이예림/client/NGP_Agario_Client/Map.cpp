@@ -170,12 +170,13 @@ mapPack Map::GetPacket()
 		Pack.feedX[i] = feed[i].position.x;
 		Pack.feedY[i] = feed[i].position.y;
 	}
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		Pack.PlayerX[i] = player[i].position.x;
 		Pack.PlayerY[i] = player[i].position.y;
  		Pack.PlayerSize[i] = player[i].GetSize();
 		Pack.PlayerScore[i] = player[i].GetScore();
 	}
+	Pack.PlayerNum = PlayerNum;
 	return Pack;
 }

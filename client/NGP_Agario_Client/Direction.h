@@ -17,9 +17,10 @@ struct mapPack
 	int feedX[500];
 	int feedY[500];
 
-	int PlayerX[2];
-	int PlayerY[2];
-	int PlayerSize[2];
+	int PlayerX[4];
+	int PlayerY[4];
+	int PlayerSize[4];
+	int PlayerScore[4];
 
-	int PlayerScore[2];
+	int PlayerNum = 0;
 };

@@ -115,6 +115,7 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     char buf[BUFSIZE]; //전송하는 데이터
     int retval;
     unsigned int count;
+    unsigned short ID = map.PlayerNum;
     addrlen = sizeof(clientaddr);
     if (client_sock == INVALID_SOCKET) {
         err_display((char*)"accept()");
@@ -126,8 +127,13 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
 
     mapPack pack;
 
-    pack = map.GetPacket();
+
+   // retval = recv(client_sock, (char*)&Player_id, sizeof(Player_id), 0);
+    retval = send(client_sock, (char*)&ID, sizeof(ID), 0);
     retval = recv(client_sock, (char*)&Player_id, sizeof(Player_id), 0);
+
+      
+    pack = map.GetPacket();
     retval = send(client_sock, (char*)&pack, sizeof(pack), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
 
     map.Update();
@@ -138,7 +144,7 @@ DWORD WINAPI UpdateGame(LPVOID arg) {
     while (1)
     {   
             retval = recv(client_sock, (char*)&recvDirection, sizeof(recvDirection), 0);
-            if (flag == false)
+            if (!map.GameEnd())
             {
                 Position* p = new Position(recvDirection.x, recvDirection.y);
                 p->SetPosition(recvDirection.x, recvDirection.y);
@@ -334,7 +340,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (LOWORD(wParam))
         {
         case STARTID:
-            for (int i = 0; i < 2; ++i)
+            for (int i = 0; i < map.PlayerNum; ++i)
             {
                 map.player[i].SetRandomPosition();
                 map.player[i].SetScore(4);

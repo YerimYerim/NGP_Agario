@@ -1,8 +1,8 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(467,5): warning MSB8028: 중간 디렉터리(x64\Debug\)에 다른 프로젝트(NGP_Agario_Client.vcxproj)에서 공유하는 파일이 포함되어 있습니다.  이로 인해 잘못된 정리 및 다시 빌드 동작이 수행될 수 있습니다.
   NGP_Agario_Client.cpp
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(134,9): warning C4101: 'Size' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(114,10): warning C4101: 'buf' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(133,17): warning C4101: 'Str' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(116,18): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
-D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(289,17): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(141,9): warning C4101: 'Size' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(115,10): warning C4101: 'buf' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(140,17): warning C4101: 'Str' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(117,18): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
+D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\NGP_Agario_Client\NGP_Agario_Client.cpp(300,17): warning C4101: 'count' :참조되지 않은 지역 변수입니다.
   NGP_Agario_Client.vcxproj -> D:\NGP_Agario\sever\NGP_Agario_Server - 이예림\client\x64\Debug\NGP_AGRIO_Sever.exe

@@ -100,13 +100,13 @@ void GameSendRoutine(int& length);
         //}
         mapPack temp;
         int length;
-        player.position.x = 100;
-        player.position.y = 100;
+        
+        player.SetRandomPosition();
 
         while (1)
         {
 
-            sendDirection.id = 1;
+            sendDirection.id = Player_id;
             sendDirection.x = player.position.x;
             sendDirection.y = player.position.y;
             retval = send(sock, (char*)&sendDirection, sizeof(sendDirection), 0);
@@ -114,13 +114,13 @@ void GameSendRoutine(int& length);
                 err_display((char*)"send()");
                 exit(1);
             }
-            retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+            retval = recv(sock, (char*)&temp, sizeof(temp), 0);
             if (retval == SOCKET_ERROR) {
                 err_display((char*)"send()");
                 exit(1);
             }
-            map.Update();
             map.Set(temp);
+            map.Update();
 
         }
         return 0;
@@ -235,16 +235,20 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    if (retval == SOCKET_ERROR) err_quit((char*)"connect()");
 
    // 데이터 통신에 사용할 변수
-   Player_id = 1;
-   retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0); 
-
+   //retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0); 
+   //if (retval == SOCKET_ERROR) {
+   //    err_display((char*)"send()");
+   //    exit(1);
+   //}
+   retval = recv(sock, (char*)&Player_id, sizeof(Player_id), 0);
    if (retval == SOCKET_ERROR) {
-       err_display((char*)"send()");
+       err_display((char*)"recv()");
        exit(1);
    }
+   retval = send(sock, (char*)&Player_id, sizeof(Player_id), 0);
    mapPack temp;
    // 받는곳
-   retval = recv(sock, (char*)&temp, sizeof(temp), 0); // 파일의 네임과 크기가 있는 files 를 먼저 전송
+   retval = recv(sock, (char*)&temp, sizeof(temp), 0);
    map.Set(temp);
    ProtocolThread = CreateThread(NULL, 0, Server_Thread, (LPVOID)sock, 0, NULL);
    //cout << "맵 크기~~?"  << sizeof(map) << endl;
@@ -279,14 +283,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         map.Draw(hdc);
         if (map.GameEnd())
         {
-            if (map.player[0].GetSize() > map.player[1].GetSize())
+            int id;
+            int score = 0;
+            char buff[80];
+            for (int i = 0; i < map.PlayerNum; ++i)
             {
-                TextOut(hdc, 0, 0, "PLAYER 0 WIN", 12);
+
+                if (score < map.player[i].GetScore())
+                {
+                    score = map.player[i].GetScore();
+                    id = i;
+                }
             }
-            else
-            {
-                TextOut(hdc, 0, 0, "PLAYER 1 WIN", 12);
-            }
+            sprintf(buff, "%d is WINNER %d",id);
+            TextOut(hdc, 0, 0, buff, sizeof(buff) / sizeof(char));
             TextOut(hdc, 0, 20, "WAITING FOR SEVER RESTART", 25);
         }
         GetClientRect(hWnd, &bufferRT);
@@ -304,32 +314,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             exit(1);
         }
-       // int len;
-       // GameSendRoutine(len);
-//
-//        if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-//        {
-//            sendDirection.dir = player.VerticalInput(wParam);
-//  //          SendKeyBoardThreadVertical = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
-//        }
-//        if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-//        {
-//            sendDirection.dir = player.HorizontalInput(wParam);
-////            SendKeyBoardThreadHorizontal = CreateThread(NULL, 0, KeyboardSend, NULL, 0, NULL);
-//        }
-
 
     }
     break;
     case WM_TIMER:
     {
-        //if (!map.GameEnd())
-        //{
-        //    if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
-        //        player.HorizontalMove(player.HorizontalInput(wParam));
-        //    if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
-        //        player.VerticalMove(player.VerticalInput(wParam));
-        //}
+        if (!map.GameEnd())
+        {
+            if (GetAsyncKeyState(VK_RIGHT) < 0 || GetAsyncKeyState(VK_LEFT) < 0)
+                player.HorizontalMove(player.HorizontalInput(wParam));
+            if (GetAsyncKeyState(VK_UP) < 0 || GetAsyncKeyState(VK_DOWN) < 0)
+                player.VerticalMove(player.VerticalInput(wParam));
+        }
+        map.Update();
         InvalidateRect(hWnd, NULL, FALSE);
     }break;
 
